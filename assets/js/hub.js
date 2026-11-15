@@ -17,6 +17,15 @@
     } catch { return null; }
   }
 
+  function photosInfo() {
+    try {
+      const m = JSON.parse(localStorage.getItem("magmart-local"));
+      if (!m?.count) return null;
+      const sent = m.envoi ? ` · envoyées le ${new Date(m.envoi.date).toLocaleDateString("fr-FR")}` : "";
+      return `${m.count} photo${m.count > 1 ? "s" : ""} · ${m.essentials} sur ${m.essentialsTotal} essentielles${sent}`;
+    } catch { return null; }
+  }
+
   function render() {
     const p = Projet.get();
     const st = projectStatus();
@@ -33,7 +42,10 @@
         info: ex ? `CA année 2 : ${fmt(ex.years[1].ca)} · ${ex.seuilClients != null ? "seuil : " + ex.seuilClients + " clients/jour" : "seuil non atteint"}` : null },
       { key: "financement", n: 5, href: "dossier.html", title: "Financement", desc: "Plan de financement, remboursement, ratios et pièces pour la banque.",
         info: st.financement ? `${pieces} pièce${pieces > 1 ? "s" : ""} prête${pieces > 1 ? "s" : ""}${p.dossier?.nom ? " · " + p.dossier.nom : ""}` : null },
+      { key: "photos", n: 6, href: "photos.html", title: "Photos du local", desc: "Vous avez un local ? Mur par mur, une première visite sans déplacement.", optional: true,
+        info: photosInfo() },
     ];
+    st.photos = !!photosInfo();
     const next = steps.find((s) => !st[s.key] && !s.optional) || steps.find((s) => !st[s.key]);
 
     box.innerHTML = steps.map((s) => `
@@ -49,7 +61,7 @@
     const required = steps.filter((s) => !s.optional);
     const done = required.filter((s) => st[s.key]).length;
     const complete = done === required.length;
-    $("hub-progress").textContent = complete ? "Les quatre étapes essentielles sont complètes (le plan est facultatif)." : `${done} étape${done > 1 ? "s" : ""} essentielle${done > 1 ? "s" : ""} sur ${required.length} complétée${done > 1 ? "s" : ""} (le plan est facultatif).`;
+    $("hub-progress").textContent = complete ? "Les quatre étapes essentielles sont complètes (le plan et les photos sont facultatifs)." : `${done} étape${done > 1 ? "s" : ""} essentielle${done > 1 ? "s" : ""} sur ${required.length} complétée${done > 1 ? "s" : ""} (le plan et les photos sont facultatifs).`;
     // Une seule action principale : continuer tant que le dossier est incomplet, envoyer ensuite
     $("hub-next").hidden = complete || !next;
     if (next) { $("hub-next").href = next.href; $("hub-next").textContent = `${done ? "Continuer" : "Commencer"} : ${next.title}`; }
@@ -73,13 +85,15 @@
       planInfo() ? `• Plan : ${planInfo()}` : "",
       ex ? `• Rentabilité : CA année 2 ${fmt(ex.years[1].ca)}, EBE ${fmt(ex.years[1].ebe)}, ${ex.seuilClients != null ? "seuil " + ex.seuilClients + " clients/jour" : "seuil non atteint"}` : "",
       p.dossier?.nom ? `• Financement : dossier préparé au nom de ${p.dossier.nom}, ${pieces} pièce(s) prête(s)` : "",
+      photosInfo() ? `• Photos du local : ${photosInfo()}${/envoyées/.test(photosInfo()) ? "" : " (je vous les envoie depuis la page Photos du local)"}` : "",
       "Je souhaite réserver mon diagnostic offert.",
     ].filter(Boolean).join("\n"));
   }
 
   $("hub-clear").addEventListener("click", () => {
     if (!confirm("Effacer toutes les données de votre projet enregistrées dans ce navigateur ?")) return;
-    ["magmart-projet", "magmart-plan", "magmart-exploitation"].forEach((k) => { try { localStorage.removeItem(k); } catch { /* rien */ } });
+    ["magmart-projet", "magmart-plan", "magmart-exploitation", "magmart-local"].forEach((k) => { try { localStorage.removeItem(k); } catch { /* rien */ } });
+    try { indexedDB.deleteDatabase("magmart-photos"); } catch { /* rien */ }
     render();
   });
   render();

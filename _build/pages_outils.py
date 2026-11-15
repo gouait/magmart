@@ -223,6 +223,7 @@ STUDIO = f'''<section class="studio"><div class="wrap">
           <button type="button" id="btn-svg">Plan vectoriel (SVG)</button>
           <button type="button" id="cut-png">Coupe en image (PNG)</button>
           <button type="button" id="btn-print">Imprimer ou PDF</button>
+          <button type="button" id="btn-cad">Dossier pour la CAO (JSON)</button>
         </div></details>
       <a href="projet.html" class="btn btn--ghost btn--sm">Voir la synthèse</a>
     </div>

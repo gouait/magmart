@@ -718,7 +718,9 @@
       let x = 0.2;
       if (surf >= 150 && res.h >= 2.7 && res.w >= 7) { items.push(addItem("chambre", res.x + res.w - 3.2, res.y + 0.1)); }
       while (x + 2.7 <= res.x + res.w - (surf >= 150 ? 3.6 : 0.2) && items.length < 8) { items.push(addItem("rack", x, res.y + 0.1)); x += 2.9; }
-      if (surf >= 150 && res.h >= 3) items.push(addItem("web", 0.2, res.y + res.h - 1.0));
+      // Poste web à droite de la porte de la réserve (0,20 à 1,40 m), jamais devant elle
+      const webX = res.x + 1.8, webEnd = res.x + res.w - (items.some((i) => i.type === "chambre") ? 3.4 : 0.2);
+      if (surf >= 150 && res.h >= 3 && webX + 2.0 <= webEnd) items.push(addItem("web", webX, res.y + res.h - 1.0));
     }
     zones.push({ id: uid(), type: "vente", x: 0, y: sy0, w: W, h: D - sy0 });
 
@@ -946,6 +948,20 @@
   $("pg-svgx").addEventListener("click", () => exportNode(pgSvg, "magmart-planogramme"));
   $("cut-png").addEventListener("click", () => exportNode(coupe, "magmart-coupe-planogramme", true));
   $("btn-print").addEventListener("click", () => window.print());
+  // Dossier d'échange pour la production des plans DWG / IFC (kit CAO Magmart)
+  $("btn-cad").addEventListener("click", () => {
+    S.items.forEach((it) => PG[it.type] && ensurePg(it));
+    const projet = typeof Projet !== "undefined" ? Projet.get() : {};
+    const dossier = {
+      format: "magmart-cad", version: 1, genere: new Date().toISOString(),
+      projet: { ville: projet.ville || "", surface: projet.surface || null, format: projet.format || null, stade: projet.stade || null, date: projet.date || null },
+      plan: JSON.parse(JSON.stringify(S)),
+      catalogue: Object.fromEntries(Object.entries(CATALOG).map(([k, c]) => [k, { label: c.label, h: c.h, cat: c.cat, froid: !!c.cold, faces: PG[k]?.faces || 0 }])),
+      zones: Object.fromEntries(Object.entries(ZONES).map(([k, z]) => [k, { label: z.label, vente: !!z.sales }])),
+      familles: Object.fromEntries(Object.entries(FAMILLES).map(([k, f]) => [k, f.label])),
+    };
+    download(new Blob([JSON.stringify(dossier, null, 1)], { type: "application/json" }), `magmart-dossier-cao-${(projet.ville || "projet").toLowerCase().replace(/[^a-z0-9]+/g, "-")}.json`);
+  });
   // L'envoi se fait depuis « Simuler mon projet », qui reprend le résumé du plan
 
   document.querySelectorAll("[name=cutdir]").forEach((r) => r.addEventListener("change", () => { S.cut.dir = r.value; render(); }));

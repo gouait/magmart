@@ -370,7 +370,7 @@ CONTACT = page_hero("Contact", "Réservez votre diagnostic offert.",
       <li><strong>Lecture de la zone</strong> : concurrence, accès, flux, enseignes proches.</li>
       <li><strong>Restitution</strong> : format recommandé, fourchette d'investissement, risques et prochaines étapes.</li>
     </ol>
-    <p class="muted" style="font-size:var(--fs-sm)">Pour gagner du temps, préparez l'adresse du local, sa surface, un plan ou des photos.</p>
+    <p class="muted" style="font-size:var(--fs-sm)">Pour gagner du temps, préparez l'adresse du local, sa surface et un plan. Vous avez déjà le local ? <a href="photos.html">Envoyez-nous ses photos, mur par mur</a> : c'est une première visite sans déplacement.</p>
     <a href="#" data-wa class="btn btn--ghost btn--block">''' + WA_IC + '''Écrire directement sur WhatsApp</a>
     <p class="muted" style="font-size:var(--fs-xs);margin-top:16px">Vous préférez préparer d'abord ? <a href="demarrer.html">Simulez votre projet</a> : votre dossier nous arrivera complet.</p>
   </aside>
@@ -410,7 +410,8 @@ MENTIONS = page_hero("Informations légales", "Mentions légales et confidential
   <h2 id="donnees">Données personnelles (loi 09-08)</h2>
   <p>Les outils de « Simuler mon projet » (profil, budget, plan, rentabilité, financement) fonctionnent dans votre navigateur : vos réponses y sont enregistrées localement et <strong>ne nous sont pas transmises</strong> tant que vous ne nous les envoyez pas vous-même, par exemple sur WhatsApp. Le site charge sa police depuis Google Fonts ; un message envoyé par WhatsApp relève des conditions d'utilisation de WhatsApp (Meta).</p>
   <p>Lorsque vous nous contactez, nous utilisons vos informations uniquement pour répondre à votre demande et suivre votre projet. Elles ne sont ni vendues ni cédées. Vous pouvez demander leur accès, leur rectification ou leur suppression à <a href="mailto:contact@magmart.ma">contact@magmart.ma</a>. <span class="todo">Numéro de déclaration ou d'autorisation CNDP à compléter</span>.</p>
-  <p>Pour effacer les données enregistrées dans votre navigateur, utilisez le bouton « Effacer mes données » de la page <a href="projet.html">Simuler mon projet</a>.</p>
+  <p><strong>Photos du local.</strong> Les photos ajoutées sur la page <a href="photos.html">Photos de mon local</a> restent sur votre appareil jusqu'à ce que vous les envoyiez. Avant l'envoi, elles sont allégées et leurs métadonnées, dont la position GPS, sont retirées. À l'envoi, elles nous parviennent avec vos remarques, vos mesures et votre simulation, selon le mode utilisé : stockage Magmart hébergé par Google Drive, WhatsApp ou e-mail. Elles servent uniquement à étudier votre projet et sont conservées le temps de l'étude et de la réalisation, puis supprimées <span class="todo">durée de conservation à confirmer</span>. Évitez de photographier des personnes.</p>
+  <p>Pour effacer les données enregistrées dans votre navigateur, utilisez le bouton « Effacer mes données » de la page <a href="projet.html">Simuler mon projet</a> ; il efface aussi les photos du local.</p>
   <h2>Estimations</h2>
   <p>Les budgets, prévisionnels et plans produits par les outils sont des estimations indicatives, sans valeur contractuelle, comptable ni fiscale. Ils sont confirmés par une proposition écrite et par les devis des entreprises.</p>
 </div></div></section>'''

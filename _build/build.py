@@ -11,6 +11,7 @@ from pages_site import INDEX, OFFRE, MRE, APROPOS, CONTACT, FRANCHISE, MENTIONS,
 from pages_outils import WIZARD, SIMULATEUR, STUDIO
 from page_exploitation import EXPLOITATION
 from page_dossier import DOSSIER
+from page_photos import PHOTOS
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
@@ -61,3 +62,6 @@ page(ROOT, "dossier.html", "Préparer mon dossier de financement — Magmart",
      "Un dossier bancaire prêt à imprimer : plan de financement, prévisionnel sur 3 ans, remboursement, ratios et pièces à réunir pour financer votre supérette.",
      tool_head("financement", "Préparer mon dossier de financement", "Votre projet, vos chiffres et vos pièces, réunis dans un dossier à présenter à votre banque.") + DOSSIER + tool_nav("financement"),
      current="projet.html", tool=True, scripts=("dossier.js",))
+page(ROOT, "photos.html", "Photos de mon local — Magmart",
+     "Envoyez les photos de votre local, mur par mur : Magmart prépare le relevé, le plan et les points techniques avant la première visite.", PHOTOS,
+     current="projet.html", tool=True, scripts=("photos.js",))
