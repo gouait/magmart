@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Préparer mon dossier de financement — Magmart</title>
+  <meta name="description" content="Un dossier bancaire prêt à imprimer : plan de financement, prévisionnel sur 3 ans, remboursement, ratios et pièces à réunir pour financer votre supérette.">
+  <link rel="canonical" href="https://www.magmart.ma/dossier.html">
+  <meta property="og:title" content="Préparer mon dossier de financement — Magmart">
+  <meta property="og:description" content="Un dossier bancaire prêt à imprimer : plan de financement, prévisionnel sur 3 ans, remboursement, ratios et pièces à réunir pour financer votre supérette.">
+  <meta property="og:image" content="https://www.magmart.ma/assets/img/hero-magasin.jpg">
+  <meta property="og:locale" content="fr_MA">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/outils.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" aria-label="Magmart, accueil"><svg viewBox="0 0 26 26" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 24V9l10-6 10 6v15" stroke="#1e9e5a"/><path d="M8 24v-9h4v9M14 24v-9h4v9" stroke="#ff6b4a"/></svg>MAGMART</a>
+    <button type="button" class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <nav class="nav" id="menu" aria-label="Navigation principale"><a href="offre.html">Offre & tarifs</a><a href="projet.html" aria-current="page">Simuler mon projet</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a><a href="#" data-wa class="btn btn--ghost">Parler à un conseiller</a></nav>
+  </div>
+</header>
+<main id="contenu">
+<div class="tool-head">
+  <div class="wrap">
+    <nav class="pstep" aria-label="Étapes de votre projet">
+      <a class="pstep-home" href="projet.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h6"/></svg><span>Simuler mon projet</span></a>
+      <ol><li data-step="profil"><a href="demarrer.html"><span class="pstep-n">1</span><span class="pstep-l">Profil</span></a></li><li data-step="budget"><a href="simulateur.html"><span class="pstep-n">2</span><span class="pstep-l">Budget</span></a></li><li data-step="plan"><a href="planificateur.html"><span class="pstep-n">3</span><span class="pstep-l">Plan & rayons<small>facultatif</small></span></a></li><li data-step="rentabilite"><a href="exploitation.html"><span class="pstep-n">4</span><span class="pstep-l">Rentabilité</span></a></li><li data-step="financement"><a href="dossier.html" aria-current="step"><span class="pstep-n">5</span><span class="pstep-l">Financement</span></a></li></ol>
+    </nav>
+    <div class="tool-title"><h1>Préparer mon dossier de financement</h1><p>Votre projet, vos chiffres et vos pièces, réunis dans un dossier à présenter à votre banque.</p></div>
+  </div>
+</div><section class="tool-body"><div class="wrap dsim">
+  <form id="dform" class="dsim-form no-print" novalidate>
+    <div class="card d-status-card">
+      <h2 class="x-h" style="margin-top:0">Données reprises de votre projet</h2>
+      <div class="d-status" id="d-status"></div>
+      <p class="alert alert--info" id="d-missing" hidden style="margin-top:12px"><span>Complétez l’étape <a href="exploitation.html">Rentabilité</a> pour que le dossier contienne votre prévisionnel.</span></p>
+    </div>
+
+    <fieldset class="x-card"><legend><span>1</span>Le porteur de projet</legend>
+      <div class="x-grid">
+        <div class="x-fld"><label for="d-nom">Nom et prénom</label><div class="x-inp"><input id="d-nom" name="d-nom" type="text" autocomplete="name"></div></div>
+        <div class="x-fld"><label for="d-statut">Statut juridique envisagé</label><div class="x-inp"><select id="d-statut" name="d-statut">
+          <option value="pp">Personne physique</option><option value="sarlau">SARL AU</option><option value="sarl">SARL</option><option value="ae">Auto-entrepreneur</option></select></div></div>
+      </div>
+      <div class="x-fld" style="margin-top:12px"><label for="d-experience">Votre expérience</label>
+        <textarea id="d-experience" name="d-experience" rows="3" class="field" placeholder="Commerce, gestion d'équipe, connaissance du quartier… C'est un critère clé pour la banque."></textarea></div>
+    </fieldset>
+
+    <fieldset class="x-card"><legend><span>2</span>Montage financier</legend>
+      <div class="x-grid">
+        <div class="x-fld"><label for="d-apport">Apport personnel</label>
+      <div class="x-inp"><input id="d-apport" name="d-apport" type="number" step="5" min="0" max="100" inputmode="decimal"><span class="x-unit">%</span></div><small>Les banques attendent souvent 20 à 30 %</small></div>
+        <div class="x-fld"><label for="d-rate">Taux du crédit</label>
+      <div class="x-inp"><input id="d-rate" name="d-rate" type="number" step="0.1" min="0" inputmode="decimal"><span class="x-unit">%</span></div></div>
+        <div class="x-fld"><label for="d-years">Durée du crédit</label>
+      <div class="x-inp"><input id="d-years" name="d-years" type="number" step="1" min="0" inputmode="decimal"><span class="x-unit">ans</span></div></div>
+      </div>
+      <details class="x-adv"><summary>Autres ressources : crédit-bail, crédit fournisseur, aide, honoraires</summary><div class="x-grid">
+        <div class="x-fld"><label for="d-leasing">Froid et caisse en crédit-bail</label>
+      <div class="x-inp"><input id="d-leasing" name="d-leasing" type="number" step="10" min="0" max="100" inputmode="decimal"><span class="x-unit">%</span></div><small>Part financée par crédit-bail</small></div>
+        <div class="x-fld"><label for="d-fournisseur">Stock payé à terme</label>
+      <div class="x-inp"><input id="d-fournisseur" name="d-fournisseur" type="number" step="10" min="0" max="100" inputmode="decimal"><span class="x-unit">%</span></div><small>Crédit fournisseur</small></div>
+        <div class="x-fld"><label for="d-subvention">Subvention ou aide</label>
+      <div class="x-inp"><input id="d-subvention" name="d-subvention" type="number" step="1000" min="0" inputmode="decimal"><span class="x-unit">MAD</span></div></div>
+        <div class="x-fld"><label for="d-honoraires">Honoraires d’accompagnement</label>
+      <div class="x-inp"><input id="d-honoraires" name="d-honoraires" type="number" step="1000" min="0" inputmode="decimal"><span class="x-unit">MAD</span></div><small>À inclure dans le besoin</small></div>
+      </div></details>
+    </fieldset>
+
+    <div class="btn-row">
+      <button type="button" id="d-print" class="btn btn--secondary btn--sm">Imprimer ou enregistrer en PDF</button>
+    </div>
+  </form>
+
+  <article class="dossier-doc" id="dossier-doc" aria-label="Dossier de financement"></article>
+</div></section><nav class="tool-nav wrap no-print" aria-label="Navigation entre les étapes"><a class="btn btn--ghost" href="exploitation.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 19l-7-7 7-7"/></svg>Rentabilité</a><a class="btn btn--primary" href="projet.html" data-next>Voir la synthèse et envoyer<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a></nav>
+</main>
+<footer class="site-footer site-footer--compact">
+  <div class="wrap footer-bottom">
+    <span>© <span data-year>2026</span> Magmart · Vos données de projet restent dans votre navigateur.</span>
+    <span><a href="projet.html" style="display:inline">Simuler mon projet</a> · <a href="offre.html" style="display:inline">Offre & tarifs</a> · <a href="mentions-legales.html" style="display:inline">Mentions légales</a></span>
+  </div>
+</footer>
+<a class="wa-float" href="#" data-wa aria-label="Écrire à Magmart sur WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.4.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.6 2.1 1.1 1 2 1.3 2.3 1.4.3.2.4.1.6 0l.8-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3Z"/></svg></a>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/dossier.js"></script>
+</body>
+</html>

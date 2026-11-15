@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Plan &amp; rayons de votre supérette (Studio 2D) | Magmart</title>
+  <meta name="description" content="Outil gratuit : dimensions du local, gondoles, froid et caisses à l&#x27;échelle, zones, vue en plan et en coupe, planogramme de chaque rayon.">
+  <link rel="canonical" href="https://www.magmart.ma/planificateur.html">
+  <meta property="og:title" content="Plan &amp; rayons de votre supérette (Studio 2D) | Magmart">
+  <meta property="og:description" content="Outil gratuit : dimensions du local, gondoles, froid et caisses à l&#x27;échelle, zones, vue en plan et en coupe, planogramme de chaque rayon.">
+  <meta property="og:image" content="https://www.magmart.ma/assets/img/hero-magasin.jpg">
+  <meta property="og:locale" content="fr_MA">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/outils.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" aria-label="Magmart, accueil"><svg viewBox="0 0 26 26" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 24V9l10-6 10 6v15" stroke="#1e9e5a"/><path d="M8 24v-9h4v9M14 24v-9h4v9" stroke="#ff6b4a"/></svg>MAGMART</a>
+    <button type="button" class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <nav class="nav" id="menu" aria-label="Navigation principale"><a href="offre.html">Offre & tarifs</a><a href="projet.html" aria-current="page">Simuler mon projet</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a><a href="#" data-wa class="btn btn--ghost">Parler à un conseiller</a></nav>
+  </div>
+</header>
+<main id="contenu">
+<div class="tool-head">
+  <div class="wrap">
+    <nav class="pstep" aria-label="Étapes de votre projet">
+      <a class="pstep-home" href="projet.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h6"/></svg><span>Simuler mon projet</span></a>
+      <ol><li data-step="profil"><a href="demarrer.html"><span class="pstep-n">1</span><span class="pstep-l">Profil</span></a></li><li data-step="budget"><a href="simulateur.html"><span class="pstep-n">2</span><span class="pstep-l">Budget</span></a></li><li data-step="plan"><a href="planificateur.html" aria-current="step"><span class="pstep-n">3</span><span class="pstep-l">Plan & rayons<small>facultatif</small></span></a></li><li data-step="rentabilite"><a href="exploitation.html"><span class="pstep-n">4</span><span class="pstep-l">Rentabilité</span></a></li><li data-step="financement"><a href="dossier.html"><span class="pstep-n">5</span><span class="pstep-l">Financement</span></a></li></ol>
+    </nav>
+    <div class="tool-title"><h1>Plan & rayons</h1><p>Étape facultative : dessinez votre local, placez le mobilier et construisez vos rayons.</p></div>
+  </div>
+</div><section class="studio"><div class="wrap">
+  <p class="studio-mobile alert alert--info"><span>Le Studio 2D se manipule plus confortablement sur un ordinateur. Sur téléphone, utilisez « Générer une implantation type » puis ajustez.</span></p>
+  <div class="studio-grid">
+  <aside class="studio-panel" aria-label="Outils de conception">
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tab-local" aria-controls="panel-local" data-tab="local" aria-selected="true"><span>1</span>Local</button>
+      <button type="button" role="tab" id="tab-zones" aria-controls="panel-zones" data-tab="zones" aria-selected="false" tabindex="-1"><span>2</span>Zones</button>
+      <button type="button" role="tab" id="tab-mobilier" aria-controls="panel-mobilier" data-tab="mobilier" aria-selected="false" tabindex="-1"><span>3</span>Mobilier</button>
+      <button type="button" role="tab" id="tab-planogramme" aria-controls="panel-planogramme" data-tab="planogramme" aria-selected="false" tabindex="-1"><span>4</span>Rayons</button>
+    </div>
+
+    <div class="tab-panel" role="tabpanel" id="panel-local" aria-labelledby="tab-local" data-panel="local">
+      <fieldset class="seg"><legend>Forme du local</legend>
+        <label><input type="radio" name="shape" value="rect"><span>Rectangle</span></label>
+        <label><input type="radio" name="shape" value="L"><span>En L</span></label>
+      </fieldset>
+      <div class="fields-2"><div class="fld"><label for="in-W">Largeur (façade)</label><div class=unit><input id="in-W" type="number" step="0.1" min="0" inputmode="decimal"></div></div><div class="fld"><label for="in-D">Profondeur</label><div class=unit><input id="in-D" type="number" step="0.1" min="0" inputmode="decimal"></div></div><div class="fld"><label for="in-H">Hauteur sous plafond</label><div class=unit><input id="in-H" type="number" step="0.1" min="0" inputmode="decimal"></div></div></div>
+      <div id="l-fields" class="fields-2" hidden>
+        <p class="hint" style="grid-column:1/-1">Partie retirée en haut à droite du plan :</p>
+        <div class="fld"><label for="in-nW">Retrait en largeur</label><div class=unit><input id="in-nW" type="number" step="0.1" min="0" inputmode="decimal"></div></div><div class="fld"><label for="in-nD">Retrait en profondeur</label><div class=unit><input id="in-nD" type="number" step="0.1" min="0" inputmode="decimal"></div></div>
+      </div>
+      <div><h2 class="panel-h">Entrée</h2><div class="fields-2"><div class="fld"><label for="in-doorX">Depuis le mur gauche</label><div class=unit><input id="in-doorX" type="number" step="0.1" min="0" inputmode="decimal"></div></div><div class="fld"><label for="in-doorW">Largeur de l’entrée</label><div class=unit><input id="in-doorW" type="number" step="0.1" min="0" inputmode="decimal"></div></div></div></div>
+      <button type="button" id="btn-template" class="btn btn--secondary btn--block">Générer une implantation type</button>
+      <p class="hint">Réserve au fond, froid le long du mur, rayons en allées de 1,6 m, caisses près de l’entrée, planogramme de départ. Ajustez ensuite librement.</p>
+    </div>
+
+    <div class="tab-panel" role="tabpanel" id="panel-zones" aria-labelledby="tab-zones" data-panel="zones" hidden>
+      <div><h2 class="panel-h">Délimiter les espaces</h2><p class="hint">Choisissez un type d’espace, puis faites glisser sur le plan pour le dessiner.</p></div>
+      <div class="zone-btns"><button type="button" data-zone="vente" aria-pressed="false"><i style="background:#15803d"></i>Vente</button><button type="button" data-zone="fl" aria-pressed="false"><i style="background:#4d7c0f"></i>Fruits & légumes</button><button type="button" data-zone="frais" aria-pressed="false"><i style="background:#334155"></i>Frais & crèmerie</button><button type="button" data-zone="surgeles" aria-pressed="false"><i style="background:#475569"></i>Surgelés</button><button type="button" data-zone="boucherie" aria-pressed="false"><i style="background:#92400e"></i>Boucherie</button><button type="button" data-zone="boulangerie" aria-pressed="false"><i style="background:#b45309"></i>Boulangerie</button><button type="button" data-zone="caisses" aria-pressed="false"><i style="background:#1f2a37"></i>Caisses</button><button type="button" data-zone="reserve" aria-pressed="false"><i style="background:#78716c"></i>Réserve</button><button type="button" data-zone="reception" aria-pressed="false"><i style="background:#a16207"></i>Réception</button><button type="button" data-zone="web" aria-pressed="false"><i style="background:#0f766e"></i>Préparation web</button><button type="button" data-zone="bureau" aria-pressed="false"><i style="background:#94a3b8"></i>Bureau & sanitaires</button></div>
+      <div class="zone-hint" id="zone-hint" hidden>Mode dessin actif : cliquez-glissez sur le plan. Échap pour quitter.</div>
+      <div><h2 class="panel-h">Espaces dessinés</h2><ul class="zone-list" id="zone-list"></ul></div>
+    </div>
+
+    <div class="tab-panel" role="tabpanel" id="panel-mobilier" aria-labelledby="tab-mobilier" data-panel="mobilier" hidden>
+      <div><h2 class="panel-h">Ajouter du mobilier</h2><p class="hint">Cliquez pour poser l’élément au centre, puis déplacez-le sur le plan. Dimensions réelles, modifiables.</p></div>
+      <div class="palette"><button type="button" data-add="gondole"><i style="background:#15803d"></i><span>Gondole centrale<small>2,5 × 1,0 m · double face</small></span></button><button type="button" data-add="murale"><i style="background:#166534"></i><span>Gondole murale<small>3,0 × 0,5 m</small></span></button><button type="button" data-add="tete"><i style="background:#ca8a04"></i><span>Tête de gondole<small>1,0 × 0,5 m</small></span></button><button type="button" data-add="promo"><i style="background:#a16207"></i><span>Îlot promotion<small>1,2 × 0,8 m</small></span></button><button type="button" data-add="froid"><i style="background:#334155"></i><span>Froid mural<small>2,5 × 0,9 m · frais</small></span></button><button type="button" data-add="bahut"><i style="background:#475569"></i><span>Bahut surgelés<small>2,0 × 0,9 m</small></span></button><button type="button" data-add="boissons"><i style="background:#64748b"></i><span>Armoire boissons<small>1,4 × 0,75 m</small></span></button><button type="button" data-add="vitrine"><i style="background:#92400e"></i><span>Vitrine service<small>2,5 × 1,1 m · boucherie</small></span></button><button type="button" data-add="fl"><i style="background:#4d7c0f"></i><span>Étal F&L<small>2,0 × 1,2 m</small></span></button><button type="button" data-add="pain"><i style="background:#b45309"></i><span>Présentoir pain<small>1,5 × 0,6 m</small></span></button><button type="button" data-add="caisse"><i style="background:#1f2a37"></i><span>Caisse<small>1,8 × 0,9 m</small></span></button><button type="button" data-add="web"><i style="background:#0f766e"></i><span>Poste web<small>2,0 × 0,8 m · préparation</small></span></button><button type="button" data-add="chambre"><i style="background:#52525b"></i><span>Chambre froide<small>3,0 × 2,5 m</small></span></button><button type="button" data-add="rack"><i style="background:#a8a29e"></i><span>Rack réserve<small>2,7 × 1,0 m</small></span></button></div>
+      <p class="hint"><span class="kbd">R</span> pivoter · <span class="kbd">Ctrl</span>+<span class="kbd">D</span> dupliquer · <span class="kbd">Suppr</span> effacer · flèches : 10 cm</p>
+    </div>
+
+    <div class="tab-panel" role="tabpanel" id="panel-planogramme" aria-labelledby="tab-planogramme" data-panel="planogramme" hidden>
+      <div><h2 class="panel-h">Du plan au planogramme</h2><p class="hint">Affectez une famille de produits à chaque tablette : la coupe projette le rayon tel que le client le verra.</p></div>
+      <ol class="hint" style="padding-left:1.1em;display:grid;gap:6px;margin:0">
+        <li>Placez la ligne de coupe (curseur « Position »).</li>
+        <li>Cliquez sur un meuble, dans la coupe ou sur le plan.</li>
+        <li>Peignez ses tablettes dans l’éditeur.</li>
+      </ol>
+      <a href="#pg-card" class="btn btn--secondary btn--block">Ouvrir l’éditeur de rayons</a>
+    </div>
+
+    <div class="sel-props" id="sel-props" hidden>
+      <b id="sel-name"></b>
+      <div id="sel-item-fields" class="fields-2"><div class="fld"><label for="sel-w">Longueur</label><div class=unit><input id="sel-w" type="number" step="0.1" min="0" inputmode="decimal"></div></div><div class="fld"><label for="sel-d">Profondeur</label><div class=unit><input id="sel-d" type="number" step="0.1" min="0" inputmode="decimal"></div></div></div>
+      <small class="muted">Hauteur ou surface : <span id="sel-h"></span></small>
+      <div class="sel-actions">
+        <button type="button" id="sel-rotate" class="btn btn--ghost btn--sm">Pivoter</button>
+        <button type="button" id="sel-dup" class="btn btn--ghost btn--sm">Dupliquer</button>
+        <button type="button" id="sel-del" class="btn btn-danger btn--sm">Supprimer</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="studio-main">
+    <div class="studio-card toolbar">
+      <button type="button" id="btn-undo" class="btn btn--ghost btn--sm">Annuler</button>
+      <button type="button" id="btn-reset" class="btn btn--ghost btn--sm">Recommencer</button>
+      <span class="sep"></span>
+      <details class="menu"><summary class="btn btn--ghost btn--sm">Exporter</summary>
+        <div class="menu-list">
+          <button type="button" id="btn-png">Plan en image (PNG)</button>
+          <button type="button" id="btn-svg">Plan vectoriel (SVG)</button>
+          <button type="button" id="cut-png">Coupe en image (PNG)</button>
+          <button type="button" id="btn-print">Imprimer ou PDF</button>
+        </div></details>
+      <a href="projet.html" class="btn btn--ghost btn--sm">Voir la synthèse</a>
+    </div>
+
+    <div class="studio-card stats-row" aria-live="polite">
+      <div><b id="st-surf">—</b><small>Surface du local</small></div>
+      <div><b id="st-vente">—</b><small>Zones de vente</small></div>
+      <div><b id="st-lin">—</b><small>Linéaire au sol</small></div>
+      <div><b id="st-dev">—</b><small>Linéaire développé (longueur totale de tablettes)</small></div>
+      <div><b id="st-froid">—</b><small>Linéaire froid</small></div>
+      <div><b id="st-caisses">—</b><small>Caisses</small></div>
+      <div><b id="st-occ">—</b><small>Surface occupée par le mobilier</small></div>
+    </div>
+
+    <div class="studio-card plan-wrap"><h2 class="sr-only">Vue en plan</h2>
+      <svg id="plan" role="img" aria-label="Vue en plan du magasin"></svg>
+    </div>
+
+    <div class="studio-card">
+      <div class="coupe-head">
+        <h2>Vue en coupe et rayons projetés</h2>
+        <fieldset class="seg"><legend class="sr-only">Sens de la coupe</legend>
+          <label><input type="radio" name="cutdir" value="A"><span>A-A transversale</span></label>
+          <label><input type="radio" name="cutdir" value="B"><span>B-B longitudinale</span></label>
+        </fieldset>
+        <label class="cut-pos"><span>Position</span><input type="range" id="cut-pos" min="0.02" max="0.98" step="0.01"></label>
+        <label class="pg-toggle"><input type="checkbox" id="cut-pg" checked> Afficher les rayons</label>
+      </div>
+      <div class="plan-wrap coupe-scroll"><svg id="coupe" role="img" aria-label="Vue en coupe du magasin avec planogramme projeté"></svg></div>
+      <p class="studio-note" style="padding:0 16px 14px">Les faces tournées vers vous sont projetées en élévation ; les meubles traversés montrent leur profil. Cliquez sur un meuble pour éditer ses rayons.</p>
+    </div>
+
+    <div class="studio-card" id="pg-card">
+      <div class="pg-head">
+        <h2>Éditeur de rayons (planogramme : ce qui se trouve sur chaque tablette)</h2>
+        <span class="sep"></span>
+        <button type="button" id="pg-auto" class="btn btn--secondary btn--sm">Planogramme type pour tout le magasin</button>
+      </div>
+      <p class="studio-note" id="pg-empty" style="padding:0 18px 18px">Ajoutez des gondoles, murales ou meubles froids (ou générez une implantation type) pour construire leurs rayons.</p>
+      <div id="pg-body">
+        <div class="pg-controls no-print">
+          <div class="fld" style="min-width:240px;flex:1"><label for="pg-item">Meuble</label><select id="pg-item" class="field"></select></div>
+          <fieldset class="seg"><legend>Face</legend><div id="pg-faces" style="display:contents"></div></fieldset>
+          <div class="fld"><label for="pg-levels">Niveaux</label>
+            <div class="stepper"><button type="button" id="pg-lv-minus" aria-label="Retirer un niveau">−</button><input id="pg-levels" type="number" min="1" max="10" inputmode="numeric"><button type="button" id="pg-lv-plus" aria-label="Ajouter un niveau">+</button></div></div>
+          <button type="button" id="pg-flip" class="btn btn--ghost btn--sm">Retourner la face</button>
+        </div>
+        <div class="pg-controls no-print">
+          <div style="flex:1;min-width:260px"><p class="lbl">Famille de produits</p><div class="pg-palette" id="pg-palette"></div></div>
+        </div>
+        <div class="pg-controls no-print">
+          <fieldset class="seg"><legend>Pinceau</legend>
+            <label><input type="radio" name="pgbrush" value="cell" checked><span>Case</span></label>
+            <label><input type="radio" name="pgbrush" value="module"><span>Module entier</span></label>
+            <label><input type="radio" name="pgbrush" value="level"><span>Niveau entier</span></label></fieldset>
+          <div class="fld" style="flex:1;min-width:200px"><label for="pg-label">Libellé (facultatif : marque, produit)</label><input id="pg-label" type="text" class="field" placeholder="Ex. Huile 1 L"></div>
+        </div>
+        <div class="plan-wrap"><svg id="pg-svg" role="img" aria-label="Élévation du meuble avec son planogramme"></svg></div>
+        <div class="pg-foot no-print">
+          <button type="button" id="pg-clear" class="btn btn-danger btn--sm">Vider ce meuble</button>
+          <span class="sep"></span>
+          <button type="button" id="pg-png" class="btn btn--ghost btn--sm">Image PNG</button>
+          <button type="button" id="pg-svgx" class="btn btn--ghost btn--sm">SVG</button>
+        </div>
+      </div>
+      <div class="pg-stats-wrap">
+        <h3>Linéaire développé par famille</h3>
+        <ul class="pg-stats" id="pg-stats"></ul>
+      </div>
+    </div>
+
+    <div class="studio-card" style="padding:16px 18px">
+      <h2 class="panel-h">Contrôles automatiques</h2>
+      <ul class="alerts" id="alerts"></ul>
+      <p class="studio-note" style="margin-top:12px">Esquisse indicative. Le plan définitif est établi par Magmart après relevé du local et étude des contraintes techniques (électricité, froid, évacuations, sécurité incendie).</p>
+    </div>
+  </div>
+  </div>
+</div></section><nav class="tool-nav wrap no-print" aria-label="Navigation entre les étapes"><a class="btn btn--ghost" href="simulateur.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 19l-7-7 7-7"/></svg>Budget</a><a class="btn btn--primary" href="exploitation.html" data-next>Étape suivante : Rentabilité<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a></nav>
+</main>
+<footer class="site-footer site-footer--compact">
+  <div class="wrap footer-bottom">
+    <span>© <span data-year>2026</span> Magmart · Vos données de projet restent dans votre navigateur.</span>
+    <span><a href="projet.html" style="display:inline">Simuler mon projet</a> · <a href="offre.html" style="display:inline">Offre & tarifs</a> · <a href="mentions-legales.html" style="display:inline">Mentions légales</a></span>
+  </div>
+</footer>
+<a class="wa-float" href="#" data-wa aria-label="Écrire à Magmart sur WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.4.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.6 2.1 1.1 1 2 1.3 2.3 1.4.3.2.4.1.6 0l.8-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3Z"/></svg></a>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/planner.js"></script>
+</body>
+</html>

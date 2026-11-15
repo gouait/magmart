@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Budget d&#x27;ouverture d&#x27;une supérette au Maroc | Magmart</title>
+  <meta name="description" content="Estimez gratuitement le budget d&#x27;ouverture de votre supérette ou supermarché au Maroc : travaux, froid, rayonnage, caisse, stock, lancement.">
+  <link rel="canonical" href="https://www.magmart.ma/simulateur.html">
+  <meta property="og:title" content="Budget d&#x27;ouverture d&#x27;une supérette au Maroc | Magmart">
+  <meta property="og:description" content="Estimez gratuitement le budget d&#x27;ouverture de votre supérette ou supermarché au Maroc : travaux, froid, rayonnage, caisse, stock, lancement.">
+  <meta property="og:image" content="https://www.magmart.ma/assets/img/hero-magasin.jpg">
+  <meta property="og:locale" content="fr_MA">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/outils.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" aria-label="Magmart, accueil"><svg viewBox="0 0 26 26" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 24V9l10-6 10 6v15" stroke="#1e9e5a"/><path d="M8 24v-9h4v9M14 24v-9h4v9" stroke="#ff6b4a"/></svg>MAGMART</a>
+    <button type="button" class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <nav class="nav" id="menu" aria-label="Navigation principale"><a href="offre.html">Offre & tarifs</a><a href="projet.html" aria-current="page">Simuler mon projet</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a><a href="#" data-wa class="btn btn--ghost">Parler à un conseiller</a></nav>
+  </div>
+</header>
+<main id="contenu">
+<div class="tool-head">
+  <div class="wrap">
+    <nav class="pstep" aria-label="Étapes de votre projet">
+      <a class="pstep-home" href="projet.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h6"/></svg><span>Simuler mon projet</span></a>
+      <ol><li data-step="profil"><a href="demarrer.html"><span class="pstep-n">1</span><span class="pstep-l">Profil</span></a></li><li data-step="budget"><a href="simulateur.html" aria-current="step"><span class="pstep-n">2</span><span class="pstep-l">Budget</span></a></li><li data-step="plan"><a href="planificateur.html"><span class="pstep-n">3</span><span class="pstep-l">Plan & rayons<small>facultatif</small></span></a></li><li data-step="rentabilite"><a href="exploitation.html"><span class="pstep-n">4</span><span class="pstep-l">Rentabilité</span></a></li><li data-step="financement"><a href="dossier.html"><span class="pstep-n">5</span><span class="pstep-l">Financement</span></a></li></ol>
+    </nav>
+    <div class="tool-title"><h1>Budget d’ouverture</h1><p>Format, surface et état du local : le budget se calcule poste par poste.</p></div>
+  </div>
+</div><section class="tool-body"><div class="wrap tool-layout">
+  <form class="card sim-form" id="sim" onsubmit="return false">
+    <fieldset class="seg"><legend>Format visé</legend>
+      <label><input type="radio" name="format" value="proxi" checked><span>Proximité</span></label>
+      <label><input type="radio" name="format" value="premium"><span>Premium</span></label>
+      <label><input type="radio" name="format" value="super"><span>Supermarché</span></label>
+    </fieldset>
+    <div class="range-field"><label class="lbl" for="surface">Surface totale du local <output id="surface-out" for="surface">200 m²</output></label>
+      <input type="range" id="surface" name="surface" min="40" max="1500" step="10" value="200"></div>
+    <fieldset class="seg"><legend>État du local</legend>
+      <label><input type="radio" name="etat" value="brut"><span>Brut</span></label>
+      <label><input type="radio" name="etat" value="renover" checked><span>À rénover</span></label>
+      <label><input type="radio" name="etat" value="amenage"><span>Déjà aménagé</span></label>
+    </fieldset>
+    <fieldset class="seg"><legend>Options</legend>
+      <label><input type="checkbox" name="frais" value="1"><span>Boucherie ou boulangerie</span></label>
+      <label><input type="checkbox" name="ecom" value="1" checked><span>Vente en ligne</span></label>
+    </fieldset>
+    <p class="muted" style="font-size:var(--fs-xs);margin:0">Hors pas-de-porte, loyer et achat du local. Ordres de grandeur observés au Maroc, affinés sur devis lors du diagnostic.</p>
+  </form>
+  <div class="card tool-result">
+    <span class="eyebrow">Budget d’ouverture estimé</span>
+    <div class="sim-total" id="sim-total" aria-live="polite">—</div>
+    <div class="sim-range" id="sim-range"></div>
+    <ul class="sim-lines" id="sim-lines"></ul>
+    <div class="kpis" id="sim-kpis"></div>
+    <a href="projet.html" class="step-link">Enregistré · voir la synthèse de mon projet</a>
+    <p class="muted" style="font-size:var(--fs-xs);margin:12px 0 0">Le chiffre d’affaires de référence est une hypothèse prudente de ventes au m², pas une prévision : l’étape Rentabilité l’affine.</p>
+  </div>
+</div></section><nav class="tool-nav wrap no-print" aria-label="Navigation entre les étapes"><a class="btn btn--ghost" href="demarrer.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 19l-7-7 7-7"/></svg>Profil</a><span class="tool-nav-r"><a class="tool-skip" href="exploitation.html" data-next>Passer à Rentabilité</a><a class="btn btn--primary" href="planificateur.html" data-next>Étape suivante : Plan & rayons<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a></span></nav>
+</main>
+<footer class="site-footer site-footer--compact">
+  <div class="wrap footer-bottom">
+    <span>© <span data-year>2026</span> Magmart · Vos données de projet restent dans votre navigateur.</span>
+    <span><a href="projet.html" style="display:inline">Simuler mon projet</a> · <a href="offre.html" style="display:inline">Offre & tarifs</a> · <a href="mentions-legales.html" style="display:inline">Mentions légales</a></span>
+  </div>
+</footer>
+<a class="wa-float" href="#" data-wa aria-label="Écrire à Magmart sur WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.4.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.6 2.1 1.1 1 2 1.3 2.3 1.4.3.2.4.1.6 0l.8-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3Z"/></svg></a>
+<script src="assets/js/main.js"></script>
+</body>
+</html>

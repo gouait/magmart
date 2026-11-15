@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Démarrer mon projet de supérette — Magmart</title>
+  <meta name="description" content="Où en est votre projet ? En 3 minutes, obtenez la formule adaptée, une estimation de budget et un calendrier. Sans inscription.">
+  <link rel="canonical" href="https://www.magmart.ma/demarrer.html">
+  <meta property="og:title" content="Démarrer mon projet de supérette — Magmart">
+  <meta property="og:description" content="Où en est votre projet ? En 3 minutes, obtenez la formule adaptée, une estimation de budget et un calendrier. Sans inscription.">
+  <meta property="og:image" content="https://www.magmart.ma/assets/img/hero-magasin.jpg">
+  <meta property="og:locale" content="fr_MA">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/outils.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" aria-label="Magmart, accueil"><svg viewBox="0 0 26 26" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 24V9l10-6 10 6v15" stroke="#1e9e5a"/><path d="M8 24v-9h4v9M14 24v-9h4v9" stroke="#ff6b4a"/></svg>MAGMART</a>
+    <button type="button" class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <nav class="nav" id="menu" aria-label="Navigation principale"><a href="offre.html">Offre & tarifs</a><a href="projet.html" aria-current="page">Simuler mon projet</a><a href="a-propos.html">À propos</a><a href="contact.html">Contact</a><a href="#" data-wa class="btn btn--ghost">Parler à un conseiller</a></nav>
+  </div>
+</header>
+<main id="contenu">
+<div class="tool-head">
+  <div class="wrap">
+    <nav class="pstep" aria-label="Étapes de votre projet">
+      <a class="pstep-home" href="projet.html"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h6"/></svg><span>Simuler mon projet</span></a>
+      <ol><li data-step="profil"><a href="demarrer.html" aria-current="step"><span class="pstep-n">1</span><span class="pstep-l">Profil</span></a></li><li data-step="budget"><a href="simulateur.html"><span class="pstep-n">2</span><span class="pstep-l">Budget</span></a></li><li data-step="plan"><a href="planificateur.html"><span class="pstep-n">3</span><span class="pstep-l">Plan & rayons<small>facultatif</small></span></a></li><li data-step="rentabilite"><a href="exploitation.html"><span class="pstep-n">4</span><span class="pstep-l">Rentabilité</span></a></li><li data-step="financement"><a href="dossier.html"><span class="pstep-n">5</span><span class="pstep-l">Financement</span></a></li></ol>
+    </nav>
+    <div class="tool-title"><h1>Démarrer mon projet</h1><p>Trois questions pour une recommandation personnalisée : formule, budget et calendrier.</p></div>
+  </div>
+</div><section class="tool-body"><div class="wrap wizard">
+  <div class="resume" id="wz-resume" hidden>
+    <span>Vous avez déjà commencé votre projet sur ce navigateur.</span>
+    <span class="btn-row"><button type="button" class="btn btn--secondary btn--sm" id="wz-continue">Reprendre</button><button type="button" class="btn btn--ghost btn--sm" id="wz-restart">Recommencer</button></span>
+  </div>
+  <div class="wz-progress" id="wz-progress" aria-hidden="true"></div>
+  <div class="wz-meta"><span id="wz-count"></span><span>Environ 3 minutes · sans inscription</span></div>
+
+  <form class="wz-card" id="wizard" novalidate>
+    <div class="wz-step" data-step="1">
+      <h2>Où en est votre projet ?</h2>
+      <p>Choisissez votre point de départ : la suite s’adapte à votre situation.</p>
+      <fieldset class="choices choices--stades"><legend class="sr-only">Stade du projet</legend><label class="choice"><input type="radio" name="stade" value="idee" required>
+  <span><i class="ic-tile"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg></i><b>J’ai une idée</b><small>Pas encore de local</small></span></label><label class="choice"><input type="radio" name="stade" value="local" required>
+  <span><i class="ic-tile"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 15.5a5.5 5.5 0 1 0 11 0 5.5 5.5 0 1 0-11 0M11.5 11.5 21 2M17 6l3 3M15 8l2 2"/></svg></i><b>J’ai un local</b><small>En vue ou signé</small></span></label><label class="choice"><input type="radio" name="stade" value="moderniser" required>
+  <span><i class="ic-tile"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h2l2.4 12.2a2 2 0 0 0 2 1.6h8.7a2 2 0 0 0 2-1.6L22 7H6M9 21h.01M18 21h.01"/></svg></i><b>Je modernise mon épicerie</b><small>40 à 120 m², passage en libre‑service</small></span></label><label class="choice"><input type="radio" name="stade" value="ouvert" required>
+  <span><i class="ic-tile"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg></i><b>Mon magasin est ouvert</b><small>Je veux mieux le gérer</small></span></label><label class="choice"><input type="radio" name="stade" value="multisite" required>
+  <span><i class="ic-tile"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l2-5h14l2 5M4 9v11h16V9M3 9h18M9 20v-6h6v6"/></svg></i><b>J’ouvre un autre magasin</b><small>2e site ou petite enseigne</small></span></label></fieldset>
+      <label class="mre-toggle"><input type="checkbox" name="mre"> <span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>Je vis à l’étranger et je suivrai le projet à distance</span></label>
+    </div>
+
+    <div class="wz-step" data-step="2" hidden>
+      <h2>Le local</h2>
+      <p>Pas encore de local ? Indiquez la surface visée : nous vous aiderons à le choisir.</p>
+      <fieldset class="choices choices--compact" id="q-local"><legend>Où en êtes-vous avec le local ?</legend>
+        <label class="choice"><input type="radio" name="local" value="recherche"><span><b>Je cherche</b><small>Pas encore de local</small></span></label>
+        <label class="choice"><input type="radio" name="local" value="nego"><span><b>En vue</b><small>Un ou plusieurs locaux en négociation</small></span></label>
+        <label class="choice"><input type="radio" name="local" value="signe"><span><b>Signé</b><small>Bail ou achat conclu</small></span></label>
+      </fieldset>
+      <div class="wz-fields">
+        <div><label class="lbl" for="wz-ville">Ville</label><input class="field" type="text" id="wz-ville" name="ville" list="villes" placeholder="Ex. : Agadir" required autocomplete="address-level2">
+          <datalist id="villes"><option>Casablanca</option><option>Rabat</option><option>Marrakech</option><option>Tanger</option><option>Fès</option><option>Agadir</option><option>Meknès</option><option>Oujda</option><option>Kénitra</option><option>Tétouan</option><option>El Jadida</option><option>Laâyoune</option><option>Mohammedia</option><option>Béni Mellal</option><option>Nador</option></datalist></div>
+        <div><label class="lbl" for="wz-surface"><span id="lbl-surface-txt">Surface du magasin</span> <output id="wz-surface-out" for="wz-surface">200 m²</output></label><input type="range" id="wz-surface" name="surface" min="40" max="1500" step="10" value="200"></div>
+      </div>
+      <fieldset class="choices choices--compact" id="q-etat"><legend>État du local</legend>
+        <label class="choice"><input type="radio" name="etat" value="brut"><span><b>Brut</b><small>Plateau nu</small></span></label>
+        <label class="choice"><input type="radio" name="etat" value="renover"><span><b>À rénover</b><small>Ancien commerce</small></span></label>
+        <label class="choice"><input type="radio" name="etat" value="amenage"><span><b>Déjà aménagé</b><small>Peu de travaux</small></span></label>
+      </fieldset>
+    </div>
+
+    <div class="wz-step" data-step="3" hidden>
+      <h2>Votre magasin</h2>
+      <fieldset class="choices choices--compact"><legend>Format</legend>
+        <label class="choice"><input type="radio" name="format" value="proxi" required><span><b>Proximité</b><small>Le quotidien du quartier</small></span></label>
+        <label class="choice"><input type="radio" name="format" value="premium"><span><b>Premium</b><small>Qualité et service</small></span></label>
+        <label class="choice"><input type="radio" name="format" value="super"><span><b>Supermarché</b><small>Courses complètes</small></span></label>
+        <label class="choice"><input type="radio" name="format" value="conseil"><span><b>Je ne sais pas</b><small>Magmart me conseille</small></span></label>
+      </fieldset>
+      <fieldset class="choices choices--compact"><legend>Rayons et services souhaités <span class="muted">(facultatif)</span></legend>
+        <label class="choice"><input type="checkbox" name="rayons" value="fl"><span><b>Fruits & légumes</b></span></label>
+        <label class="choice"><input type="checkbox" name="rayons" value="boucherie"><span><b>Boucherie</b></span></label>
+        <label class="choice"><input type="checkbox" name="rayons" value="boulangerie"><span><b>Boulangerie</b></span></label>
+        <label class="choice"><input type="checkbox" name="rayons" value="ecom"><span><b>Vente en ligne</b></span></label>
+      </fieldset>
+      <div class="wz-fields">
+        <div id="q-budget"><label class="lbl" for="wz-budget">Budget global envisagé</label><select class="field" id="wz-budget" name="budget">
+          <option value="">Je ne sais pas encore</option><option value="&lt;500k">Moins de 500 000 MAD</option><option value="500k-1.5M">500 000 – 1 500 000 MAD</option><option value="1.5-4M">1,5 – 4 M MAD</option><option value="&gt;4M">Plus de 4 M MAD</option></select></div>
+        <div><label class="lbl" for="wz-date" id="lbl-date">Ouverture souhaitée</label><input class="field" type="month" id="wz-date" name="date" pattern="[0-9]4-[0-9]2" placeholder="AAAA-MM"></div>
+      </div>
+    </div>
+
+    <div class="wz-step" data-step="4" hidden>
+      <span class="eyebrow">Votre recommandation</span>
+      <h2 id="reco-title">Voici ce que nous vous proposons</h2>
+      <div id="reco"></div>
+      <div class="reco-actions">
+        <a href="simulateur.html" class="btn btn--primary" id="reco-next"><span id="reco-next-label">Continuer : mon budget d’ouverture</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+        <a href="contact.html" class="btn btn--ghost" id="reco-wa" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" class="ic" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.4.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.6 2.1 1.1 1 2 1.3 2.3 1.4.3.2.4.1.6 0l.8-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3Z"/></svg>Réserver mon diagnostic maintenant</a>
+      </div>
+      <p class="muted" style="font-size:var(--fs-xs);margin-top:16px">Estimation indicative et non contractuelle, confirmée par une proposition écrite, en général sous 72 h après le diagnostic.</p>
+    </div>
+
+    <p class="wz-error" id="wz-error" role="alert"></p>
+    <div class="wz-nav">
+      <button type="button" class="btn btn--ghost" id="wz-prev"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 19l-7-7 7-7"/></svg>Retour</button>
+      <button type="button" class="btn btn--primary" id="wz-next">Continuer</button>
+    </div>
+  </form>
+</div></section>
+</main>
+<footer class="site-footer site-footer--compact">
+  <div class="wrap footer-bottom">
+    <span>© <span data-year>2026</span> Magmart · Vos données de projet restent dans votre navigateur.</span>
+    <span><a href="projet.html" style="display:inline">Simuler mon projet</a> · <a href="offre.html" style="display:inline">Offre & tarifs</a> · <a href="mentions-legales.html" style="display:inline">Mentions légales</a></span>
+  </div>
+</footer>
+<a class="wa-float" href="#" data-wa aria-label="Écrire à Magmart sur WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.4.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.6 2.1 1.1 1 2 1.3 2.3 1.4.3.2.4.1.6 0l.8-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3Z"/></svg></a>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/tarifs.js"></script>
+<script src="assets/js/onboarding.js"></script>
+</body>
+</html>
