@@ -607,7 +607,10 @@
     img.src = src;
   }
 
-  function render() { renderPlan(); renderCoupe(); renderPg(); save(); }
+  function render() { renderPlan(); renderCoupe(); renderPg(); save(); window.dispatchEvent(new Event("magmart:plan")); }
+
+  // Données et fonctions partagées avec la vue 3D (studio3d.js, chargé à la demande)
+  window.MagmartStudio = { get state() { return S; }, CATALOG, ZONES, FAMILLES, PG, box, outline, notch, faceDir, facesOf, nMods, levelBounds, ensurePg };
 
   /* ---------------- Interaction souris / tactile ---------------- */
   let drag = null;
@@ -983,6 +986,43 @@
   });
 
   // Premier affichage : un local vide invite à générer l'implantation type
+  /* ---------------- Vue 3D ---------------- */
+  let view3d = null, loading3d = null, pending = false;
+  const wrap3d = $("view3d");
+  async function open3d() {
+    if (!view3d) {
+      $("v3d-status").hidden = false;
+      try {
+        loading3d = loading3d || import("./studio3d.js");
+        const mod = await loading3d;
+        view3d = mod.mount($("v3d-canvas"), window.MagmartStudio);
+      } catch (err) {
+        $("v3d-status").textContent = "La vue 3D n'a pas pu se charger (connexion internet requise pour la bibliothèque 3D).";
+        return;
+      }
+      $("v3d-status").hidden = true;
+    } else { view3d.rebuild(); view3d.resume(); }
+  }
+  document.querySelectorAll("[name=viewmode]").forEach((r) => r.addEventListener("change", () => {
+    const is3d = r.value === "3d" && r.checked;
+    if (r.value !== "3d" && r.checked) { plan.parentElement.hidden = false; wrap3d.hidden = true; view3d?.pause(); return; }
+    if (is3d) { plan.parentElement.hidden = true; wrap3d.hidden = false; open3d(); }
+  }));
+  // Le plan modifié est reconstruit en 3D au plus une fois par image
+  window.addEventListener("magmart:plan", () => {
+    if (!view3d || wrap3d.hidden || pending) return;
+    pending = true; requestAnimationFrame(() => { pending = false; view3d.rebuild(); });
+  });
+  $("v3d-orbit").addEventListener("click", () => view3d?.resetView());
+  $("v3d-walk").addEventListener("click", () => { view3d?.startWalk(); $("v3d-walkpad").hidden = false; });
+  $("v3d-orbit").addEventListener("click", () => ($("v3d-walkpad").hidden = true));
+  $("v3d-shot").addEventListener("click", () => { if (!view3d) return; const a = document.createElement("a"); a.href = view3d.screenshot(); a.download = "magmart-vue-3d.png"; a.click(); });
+  [["v3d-fwd", 1], ["v3d-back", -1]].forEach(([id, v]) => {
+    const b = $(id);
+    b.addEventListener("pointerdown", () => view3d?.setHold(v));
+    ["pointerup", "pointerleave", "pointercancel"].forEach((ev) => b.addEventListener(ev, () => view3d?.setHold(0)));
+  });
+
   syncInputs();
   updateZoneButtons();
   render();

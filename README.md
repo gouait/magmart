@@ -46,6 +46,7 @@ Les étapes partagent les réponses du visiteur dans son navigateur (`localStora
 | `main.js` | Commun : mémoire du projet, estimation du budget (`SIM`), barre d'étapes, simulateur, contact |
 | `onboarding.js` | Recommandation selon le stade ; honoraires plafonnés à 8 % (6 % au-delà de 3 M), sans descendre sous le minimum |
 | `planner.js` | Studio 2D : plan, zones, mobilier (`CATALOG`), coupe, planogramme (`FAMILLES`, `PG`, `autoPlanogram`) |
+| `studio3d.js` | Vue 3D du Studio (Three.js 0.160 via CDN, chargé à la demande) : murs, façade, mobilier paramétrique, produits du planogramme, vue d'ensemble et visite à hauteur d'homme |
 | `exploitation.js` | Prévisionnel sur 36 mois (`GROUPES`, `FORMAT_ADJ`, `SCENARIOS`) |
 | `dossier.js` | Plan de financement équilibré, échéancier, ratios, pièces |
 | `hub.js` | Simuler mon projet |

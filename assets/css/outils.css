@@ -420,3 +420,17 @@ input[type=range] { width: 100%; accent-color: var(--green-700); min-height: 32p
 .step-link::after { content: "→"; }
 .hub-cta { display: grid; gap: var(--sp-2); }
 @media (max-height: 760px) { .tool-result, .xsim-out, .dsim-form { position: static; max-height: none; } }
+
+/* ---------- Vue 3D du Studio ---------- */
+.view-head { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4) 0; }
+.view3d { padding: var(--sp-2) var(--sp-2) var(--sp-3); }
+.v3d-bar { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; padding: 0 var(--sp-2) var(--sp-2); }
+.v3d-bar .sep { flex: 1; }
+.v3d-stage { position: relative; }
+.v3d-canvas { width: 100%; height: min(70vh, 640px); min-height: 360px; border-radius: var(--radius-sm); overflow: hidden; background: #eef3ef; touch-action: none; }
+.v3d-canvas canvas { display: block; width: 100% !important; height: 100% !important; }
+.v3d-status { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; font-weight: 700; color: var(--ink-soft); text-align: center; padding: var(--sp-5); }
+.v3d-walkpad { position: absolute; right: 14px; bottom: 14px; display: grid; gap: 8px; }
+.v3d-walkpad button { width: 52px; height: 52px; border-radius: 50%; border: 0; background: rgba(31, 42, 55, .82); color: #fff; font-size: 1.1rem; cursor: pointer; touch-action: none; }
+.v3d-help { padding: var(--sp-2) var(--sp-2) 0; }
+@media print { .view3d { display: none !important; } }

@@ -237,9 +237,34 @@ STUDIO = f'''<section class="studio"><div class="wrap">
       <div><b id="st-occ">—</b><small>Surface occupée par le mobilier</small></div>
     </div>
 
-    <div class="studio-card plan-wrap"><h2 class="sr-only">Vue en plan</h2>
-      <svg id="plan" role="img" aria-label="Vue en plan du magasin"></svg>
+    <div class="studio-card">
+      <div class="view-head">
+        <h2 class="sr-only">Vue du magasin</h2>
+        <fieldset class="seg"><legend class="sr-only">Type de vue</legend>
+          <label><input type="radio" name="viewmode" value="2d" checked><span>Plan 2D</span></label>
+          <label><input type="radio" name="viewmode" value="3d"><span>Vue 3D</span></label>
+        </fieldset>
+      </div>
+      <div class="plan-wrap"><svg id="plan" role="img" aria-label="Vue en plan du magasin"></svg></div>
+      <div id="view3d" class="view3d" hidden>
+        <div class="v3d-bar">
+          <button type="button" id="v3d-orbit" class="btn btn--ghost btn--sm">Vue d'ensemble</button>
+          <button type="button" id="v3d-walk" class="btn btn--secondary btn--sm">Visiter à hauteur d'homme</button>
+          <span class="sep"></span>
+          <button type="button" id="v3d-shot" class="btn btn--ghost btn--sm">Capture PNG</button>
+        </div>
+        <div class="v3d-stage">
+          <div id="v3d-canvas" class="v3d-canvas" aria-label="Vue 3D interactive du magasin" role="img"></div>
+          <p id="v3d-status" class="v3d-status" hidden>Chargement de la vue 3D…</p>
+          <div id="v3d-walkpad" class="v3d-walkpad" hidden>
+            <button type="button" id="v3d-fwd" aria-label="Avancer">▲</button>
+            <button type="button" id="v3d-back" aria-label="Reculer">▼</button>
+          </div>
+        </div>
+        <p class="studio-note v3d-help">Vue d'ensemble : faites glisser pour tourner, molette ou pincement pour zoomer, clic droit pour déplacer. Visite : faites glisser pour regarder, flèches ou Z/Q/S/D pour marcher. La 3D suit chaque modification du plan.</p>
+      </div>
     </div>
+    <script type="importmap">{{"imports": {{"three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}}}</script>
 
     <div class="studio-card">
       <div class="coupe-head">
