@@ -36,7 +36,7 @@ def icon(name, cls="ic"):
 
 
 LOGO = ('<svg viewBox="0 0 26 26" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
-        '<path d="M3 24V9l10-6 10 6v15" stroke="{roof}"/><path d="M8 24v-9h4v9M14 24v-9h4v9" stroke="#ff6b4a"/></svg>')
+        '<path d="M3 24V9l10-6 10 6v15" stroke="{roof}"/><path d="M8 24v-9h4v9M14 24v-9h4v9" stroke="#ef432b"/></svg>')
 
 NAV = [
     ("offre.html", "Offre & tarifs"),
@@ -71,7 +71,7 @@ def head(title, desc, canonical):
   <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@600;700;800&family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/outils.css">
 </head>

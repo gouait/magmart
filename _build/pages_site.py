@@ -59,11 +59,11 @@ STUDIO_MOCK = '''<svg viewBox="-1 -1 16 12.2" role="img" aria-label="Exemple de 
   <rect x="2.4" y="4.9" width="1" height="2.5" rx=".06" fill="#15803d"/><rect x="5" y="4.9" width="1" height="2.5" rx=".06" fill="#15803d"/><rect x="7.6" y="4.9" width="1" height="2.5" rx=".06" fill="#15803d"/><rect x="10.2" y="4.9" width="1" height="2.5" rx=".06" fill="#15803d"/>
   <rect x="2.4" y="7.4" width="1" height=".5" fill="#ca8a04"/><rect x="5" y="7.4" width="1" height=".5" fill="#ca8a04"/><rect x="7.6" y="7.4" width="1" height=".5" fill="#ca8a04"/><rect x="10.2" y="7.4" width="1" height=".5" fill="#ca8a04"/>
   <rect x="1" y="8.3" width="2" height="1.2" rx=".06" fill="#4d7c0f"/>
-  <rect x="9.6" y="8.3" width=".9" height="1.6" rx=".06" fill="#1f2a37"/><rect x="11.6" y="8.3" width=".9" height="1.6" rx=".06" fill="#1f2a37"/>
-  <polygon points="0,0 14,0 14,10 0,10" fill="none" stroke="#1f2a37" stroke-width=".2"/>
+  <rect x="9.6" y="8.3" width=".9" height="1.6" rx=".06" fill="#24130e"/><rect x="11.6" y="8.3" width=".9" height="1.6" rx=".06" fill="#24130e"/>
+  <polygon points="0,0 14,0 14,10 0,10" fill="none" stroke="#24130e" stroke-width=".2"/>
   <rect x="6" y="9.8" width="2" height=".4" fill="#fff"/>
-  <text x="7" y="10.8" font-size=".36" font-weight="800" text-anchor="middle" fill="#1f2a37" font-family="Plus Jakarta Sans, sans-serif">ENTRÉE</text>
-  <text x="7" y="-.4" font-size=".34" text-anchor="middle" fill="#4b5563" font-family="Plus Jakarta Sans, sans-serif">14,0 m</text>
+  <text x="7" y="10.8" font-size=".36" font-weight="800" text-anchor="middle" fill="#24130e" font-family="Readex Pro, sans-serif">ENTRÉE</text>
+  <text x="7" y="-.4" font-size=".34" text-anchor="middle" fill="#5e463c" font-family="Readex Pro, sans-serif">14,0 m</text>
 </svg>'''
 
 # ===================================================================== ACCUEIL

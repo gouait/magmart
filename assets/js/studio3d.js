@@ -22,7 +22,7 @@ function signTexture(label, color) {
   const c = document.createElement("canvas"); c.width = 512; c.height = 128;
   const g = c.getContext("2d");
   g.fillStyle = color; g.fillRect(0, 0, 512, 128);
-  g.fillStyle = "#ffffff"; g.font = "700 54px 'Plus Jakarta Sans', Arial, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
+  g.fillStyle = "#ffffff"; g.font = "700 54px 'Alexandria', 'Readex Pro', Arial, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle";
   g.fillText(label.toUpperCase(), 256, 66, 480);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
   return t;
