@@ -30,6 +30,7 @@ function signTexture(label, color) {
 
 const M = {
   wall: new THREE.MeshStandardMaterial({ color: 0xf3f1ec, roughness: 0.92 }),
+  concrete: new THREE.MeshStandardMaterial({ color: 0xbdb8b0, roughness: 0.95 }),
   plinth: new THREE.MeshStandardMaterial({ color: 0x3b4249, roughness: 0.6, metalness: 0.3 }),
   metal: new THREE.MeshStandardMaterial({ color: 0xe6e8ea, roughness: 0.42, metalness: 0.35 }),
   metalDark: new THREE.MeshStandardMaterial({ color: 0x6b7280, roughness: 0.45, metalness: 0.5 }),
@@ -183,6 +184,15 @@ export function mount(container, api) {
   }
 
   const B = {
+    poteau(it, f) {
+      const b = api.box(it), H = api.state.H;
+      if (it.round) {
+        const m = new THREE.Mesh(CYL, M.concrete);
+        m.scale.set(b.w, H, b.h); m.position.set(b.x + b.w / 2, H / 2, b.y + b.h / 2);
+        m.castShadow = true; m.receiveShadow = true; root.add(m);
+      } else aabb(root, b.x, b.x + b.w, b.y, b.y + b.h, 0, H, M.concrete);
+    },
+    gaine(it, f) { const b = api.box(it); aabb(root, b.x, b.x + b.w, b.y, b.y + b.h, 0, api.state.H, M.wall); },
     gondole(it, f, h) {
       f.box(root, f.L0, f.L1, f.C0 + 0.05, f.C1 - 0.05, 0, 0.15, M.plinth);
       f.box(root, f.L0, f.L1, f.Cm - 0.02, f.Cm + 0.02, 0, h, M.metal);
@@ -318,39 +328,44 @@ export function mount(container, api) {
     ground.rotation.x = -Math.PI / 2; ground.position.set(S.W / 2, -0.01, S.D / 2); ground.receiveShadow = true;
     root.add(ground);
 
-    // Murs : un panneau par segment du contour ; la façade (y = D) reçoit une vitrine et l'entrée
-    const cx = pts.reduce((s, p) => s + p[0], 0) / pts.length, cz = pts.reduce((s, p) => s + p[1], 0) / pts.length;
+    // Murs : un panneau par mur du contour, droit ou en biais ; le mur de l'entrée reçoit la vitrine
     const t = 0.2;
-    pts.forEach((p, i) => {
-      const q = pts[(i + 1) % pts.length];
-      const horiz = Math.abs(p[1] - q[1]) < 1e-6;
-      const isFacade = horiz && Math.abs(p[1] - S.D) < 1e-6;
+    const dg = api.doorGeom();
+    // Pan de mur le long d'un mur E, entre les abscisses s0 et s1, posé à l'extérieur du local
+    const pan = (parent, E, s0, s1, y0, y1, mat) => {
+      const m = new THREE.Mesh(BOX, mat);
+      const c = (s0 + s1) / 2;
+      m.scale.set(Math.max(0.005, s1 - s0), Math.max(0.005, y1 - y0), t);
+      m.position.set(E.a[0] + E.u[0] * c - E.n[0] * t / 2, (y0 + y1) / 2, E.a[1] + E.u[1] * c - E.n[1] * t / 2);
+      m.rotation.y = -Math.atan2(E.u[1], E.u[0]);
+      m.castShadow = true; m.receiveShadow = true;
+      parent.add(m);
+      return m;
+    };
+    api.edges().forEach((E) => {
       const g = new THREE.Group();
-      const mx = (p[0] + q[0]) / 2, mz = (p[1] + q[1]) / 2;
-      const normal = horiz ? new THREE.Vector3(0, 0, mz > cz ? 1 : -1) : new THREE.Vector3(mx > cx ? 1 : -1, 0, 0);
-      const seg = (a0, a1, y0, y1, mat) => (horiz ? aabb(g, Math.min(a0, a1), Math.max(a0, a1), mz - t / 2 + normal.z * t / 2, mz + t / 2 + normal.z * t / 2, y0, y1, mat)
-                                                   : aabb(g, mx - t / 2 + normal.x * t / 2, mx + t / 2 + normal.x * t / 2, Math.min(a0, a1), Math.max(a0, a1), y0, y1, mat));
-      if (isFacade) {
-        const x0 = Math.min(p[0], q[0]), x1 = Math.max(p[0], q[0]);
-        const d0 = S.doorX, d1 = S.doorX + S.doorW;
-        for (const [a, b] of [[x0, d0], [d1, x1]]) {
+      if (E.i === dg.E.i) {
+        const d0 = dg.t, d1 = dg.t + dg.w;
+        for (const [a, b] of [[0, d0], [d1, E.len]]) {
           if (b - a < 0.05) continue;
-          seg(a, b, 0, 0.45, M.wall);                              // allège
-          seg(a, b, 0.45, 2.6, M.glass).castShadow = false;       // vitrine
-          for (let k = a; k <= b + 1e-6; k += Math.max(1, (b - a) / Math.ceil((b - a) / 2.2))) seg(k - 0.03, k + 0.03, 0.45, 2.6, M.frame);
+          pan(g, E, a, b, 0, 0.45, M.wall);                               // allège
+          pan(g, E, a, b, 0.45, 2.6, M.glass).castShadow = false;        // vitrine
+          const k = Math.max(1, Math.ceil((b - a) / 2.2));
+          for (let j = 0; j <= k; j++) { const x = a + ((b - a) * j) / k; pan(g, E, x - 0.03, x + 0.03, 0.45, 2.6, M.frame); }
         }
-        seg(x0, x1, 2.6, S.H, M.wall);                            // bandeau d'enseigne
-        seg(d0 - 0.05, d0, 0, 2.6, M.frame); seg(d1, d1 + 0.05, 0, 2.6, M.frame);
+        pan(g, E, 0, E.len, 2.6, S.H, M.wall);                            // bandeau d'enseigne
+        pan(g, E, d0 - 0.05, d0, 0, 2.6, M.frame); pan(g, E, d1, d1 + 0.05, 0, 2.6, M.frame);
       } else {
-        seg(horiz ? p[0] : p[1], horiz ? q[0] : q[1], 0, S.H, M.wall);
+        pan(g, E, -t, E.len + t, 0, S.H, M.wall);                        // les angles sont refermés par le recouvrement
       }
-      g.userData = { normal, center: new THREE.Vector3(mx, S.H / 2, mz) };
+      g.userData = { normal: new THREE.Vector3(-E.n[0], 0, -E.n[1]), center: new THREE.Vector3(E.m[0], S.H / 2, E.m[1]) };
       root.add(g); walls.push(g);
     });
 
-    // Enseigne au-dessus de l'entrée
-    const sign = new THREE.Mesh(new THREE.PlaneGeometry(Math.min(S.W * 0.5, 6), 0.55), new THREE.MeshStandardMaterial({ map: signTexture("Ma supérette", "#15803d"), emissive: 0xffffff, emissiveIntensity: 0.15 }));
-    sign.position.set(S.doorX + S.doorW / 2, Math.min(S.H - 0.35, 3.1), S.D + 0.13);
+    // Enseigne au-dessus de l'entrée, tournée vers la rue
+    const sign = new THREE.Mesh(new THREE.PlaneGeometry(Math.min(dg.E.len * 0.6, 6), 0.55), new THREE.MeshStandardMaterial({ map: signTexture("Ma supérette", "#15803d"), emissive: 0xffffff, emissiveIntensity: 0.15 }));
+    sign.position.set(dg.m[0] - dg.n[0] * (t + 0.03), Math.min(S.H - 0.35, 3.1), dg.m[1] - dg.n[1] * (t + 0.03));
+    sign.rotation.y = Math.atan2(-dg.n[0], -dg.n[1]);
     root.add(sign);
 
     // Mobilier
@@ -368,8 +383,14 @@ export function mount(container, api) {
       const zf = z.y + z.h;
       if (zf >= S.D - 0.5) continue;
       const doorFrom = z.x + 0.2, doorTo = z.x + 1.4;
-      if (doorFrom > z.x + 0.05) aabb(root, z.x, doorFrom, zf - 0.05, zf + 0.05, 0, S.H, M.wall);
-      aabb(root, doorTo, z.x + z.w, zf - 0.05, zf + 0.05, 0, S.H, M.wall);
+      // La cloison s'arrête aux murs du local (contour libre) et laisse le passage de la porte
+      const xs = [];
+      for (const E of api.edges()) { const y = zf + 1e-6; if ((E.a[1] - y) * (E.b[1] - y) < 0) xs.push(E.a[0] + (E.b[0] - E.a[0]) * (y - E.a[1]) / (E.b[1] - E.a[1])); }
+      xs.sort((p, q) => p - q);
+      for (let k = 0; k + 1 < xs.length; k += 2) {
+        const lo = Math.max(xs[k], z.x), hi = Math.min(xs[k + 1], z.x + z.w);
+        for (const [a, b] of [[lo, Math.min(hi, doorFrom)], [Math.max(lo, doorTo), hi]]) if (b - a > 0.05) aabb(root, a, b, zf - 0.05, zf + 0.05, 0, S.H, M.wall);
+      }
       aabb(root, doorFrom, doorTo, zf - 0.05, zf + 0.05, 2.2, S.H, M.wall);
       aabb(root, doorFrom + 0.05, doorTo - 0.05, zf - 0.03, zf + 0.03, 0, 2.15, M.metalDark).material = new THREE.MeshStandardMaterial({ color: 0x9aa3ad, roughness: 0.4, metalness: 0.5, transparent: true, opacity: 0.85 });
     }
@@ -386,7 +407,7 @@ export function mount(container, api) {
 
     // Luminaires (visibles en visite)
     ceiling = new THREE.Group();
-    for (let z = 1.5; z < S.D - 0.5; z += 2.4) for (let x = 1.2; x < S.W - 0.8; x += 3) aabb(ceiling, x, x + 1.2, z, z + 0.2, S.H - 0.08, S.H - 0.04, M.light, false);
+    for (let z = 1.5; z < S.D - 0.5; z += 2.4) for (let x = 1.2; x < S.W - 0.8; x += 3) if (api.pointIn(x, z) && api.pointIn(x + 1.2, z + 0.2)) aabb(ceiling, x, x + 1.2, z, z + 0.2, S.H - 0.08, S.H - 0.04, M.light, false);
     const ceil = new THREE.Mesh(new THREE.ShapeGeometry(shape), new THREE.MeshStandardMaterial({ color: 0xf7f7f4, roughness: 0.95, side: THREE.DoubleSide }));
     ceil.rotation.x = Math.PI / 2; ceil.position.y = S.H; ceiling.add(ceil);
     ceiling.visible = mode === "walk";
@@ -415,16 +436,22 @@ export function mount(container, api) {
   function startWalk() {
     const S = api.state;
     mode = "walk"; controls.enabled = false; if (ceiling) ceiling.visible = true;
-    walk.pos.set(S.doorX + S.doorW / 2, 1.6, S.D - 0.6);
-    walk.yaw = 0; walk.pitch = -0.08;            // regard vers le fond du magasin (−Z)
+    const dg = api.doorGeom();
+    walk.pos.set(dg.m[0] + dg.n[0] * 0.6, 1.6, dg.m[1] + dg.n[1] * 0.6);
+    walk.yaw = Math.atan2(-dg.n[0], -dg.n[1]); walk.pitch = -0.08;   // on entre en regardant l'intérieur
     camera.fov = 68; camera.updateProjectionMatrix();
   }
 
   /* ---------------- visite à hauteur d'homme ---------------- */
   const free = (x, z) => {
     const S = api.state, r = 0.28;
-    if (x < r || z < r || x > S.W - r || z > S.D - 0.15) return false;
-    const n = api.notch?.(); if (n && x > n.x - r && z < n.y + n.h + r) return false;
+    if (!api.pointIn(x, z)) return false;
+    // distance aux murs (l'entrée reste franchissable)
+    const dg = api.doorGeom();
+    for (const E of api.edges()) {
+      const sp = Math.max(0, Math.min(E.len, (x - E.a[0]) * E.u[0] + (z - E.a[1]) * E.u[1]));
+      if (Math.hypot(x - (E.a[0] + E.u[0] * sp), z - (E.a[1] + E.u[1] * sp)) < (E.i === dg.E.i && sp > dg.t && sp < dg.t + dg.w ? 0.15 : r)) return false;
+    }
     return !blockers.some((b) => x > b.x - r && x < b.x + b.w + r && z > b.y - r && z < b.y + b.h + r);
   };
   let drag = null;

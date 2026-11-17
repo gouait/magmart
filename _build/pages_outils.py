@@ -163,16 +163,38 @@ STUDIO = f'''<section class="studio"><div class="wrap">
     </div>
 
     <div class="tab-panel" role="tabpanel" id="panel-local" aria-labelledby="tab-local" data-panel="local">
-      <fieldset class="seg"><legend>Forme du local</legend>
+      <fieldset class="seg"><legend>Forme de départ</legend>
         <label><input type="radio" name="shape" value="rect"><span>Rectangle</span></label>
         <label><input type="radio" name="shape" value="L"><span>En L</span></label>
+        <label><input type="radio" name="shape" value="libre"><span>Libre</span></label>
       </fieldset>
-      <div class="fields-2">{fld("in-W", "Largeur (façade)")}{fld("in-D", "Profondeur")}{fld("in-H", "Hauteur sous plafond")}</div>
+      <p class="hint wall-hint">Sur le plan, <b>faites glisser les coins</b> pour suivre les vrais murs ; cliquez sur un <b>+</b> au milieu d'un mur pour ajouter un angle. Les murs peuvent être en biais.</p>
+      <div class="fields-2">{fld("in-W", "Largeur totale")}{fld("in-D", "Profondeur totale")}{fld("in-H", "Hauteur sous plafond")}</div>
       <div id="l-fields" class="fields-2" hidden>
         <p class="hint" style="grid-column:1/-1">Partie retirée en haut à droite du plan :</p>
         {fld("in-nW", "Retrait en largeur")}{fld("in-nD", "Retrait en profondeur")}
       </div>
-      <div><h2 class="panel-h">Entrée</h2><div class="fields-2">{fld("in-doorX", "Depuis le mur gauche")}{fld("in-doorW", "Largeur de l'entrée")}</div></div>
+      <details class="corners" id="corners">
+        <summary>Coins et murs, cote par cote <span id="corner-count"></span></summary>
+        <p class="hint">Mesures en mètres depuis l'angle haut gauche du plan (x vers la droite, y vers la façade).</p>
+        <table class="corner-table"><thead><tr><th>Coin</th><th>x</th><th>y</th><th>Mur suivant</th><th><span class="sr-only">Supprimer</span></th></tr></thead><tbody id="corner-rows"></tbody></table>
+        <button type="button" id="corner-add" class="btn btn--ghost btn--sm">Ajouter un coin</button>
+      </details>
+      <div><h2 class="panel-h">Entrée</h2>
+        <div class="fields-2">
+          <div class="fld"><label for="in-doorE">Sur le mur</label><select id="in-doorE"></select></div>
+          {fld("in-doorX", "Depuis le coin")}{fld("in-doorW", "Largeur de l'entrée")}
+        </div>
+        <p class="hint">Vous pouvez aussi faire glisser l'entrée sur le plan.</p>
+      </div>
+      <div><h2 class="panel-h">Poteaux et obstacles</h2>
+        <div class="btn-row">
+          <button type="button" class="btn btn--ghost btn--sm" data-add="poteau">Poteau carré</button>
+          <button type="button" class="btn btn--ghost btn--sm" data-add="poteau" data-round="1">Poteau rond</button>
+          <button type="button" class="btn btn--ghost btn--sm" data-add="gaine">Gaine, trémie</button>
+        </div>
+        <p class="hint">Placez chaque poteau sur le plan, puis donnez ses dimensions réelles. Le mobilier qui le chevauche est signalé.</p>
+      </div>
       <button type="button" id="btn-template" class="btn btn--secondary btn--block">Générer une implantation type</button>
       <p class="hint">Réserve au fond, froid le long du mur, rayons en allées de 1,6 m, caisses près de l'entrée, planogramme de départ. Ajustez ensuite librement.</p>
     </div>
@@ -203,6 +225,8 @@ STUDIO = f'''<section class="studio"><div class="wrap">
     <div class="sel-props" id="sel-props" hidden>
       <b id="sel-name"></b>
       <div id="sel-item-fields" class="fields-2">{fld("sel-w", "Longueur")}{fld("sel-d", "Profondeur")}</div>
+      <label class="pg-toggle" id="sel-round-wrap" hidden><input type="checkbox" id="sel-round"> Section ronde</label>
+      <button type="button" id="vtx-del" class="btn btn-danger btn--sm" hidden>Supprimer ce coin</button>
       <small class="muted">Hauteur ou surface : <span id="sel-h"></span></small>
       <div class="sel-actions">
         <button type="button" id="sel-rotate" class="btn btn--ghost btn--sm">Pivoter</button>

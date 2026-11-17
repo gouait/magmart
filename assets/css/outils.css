@@ -479,3 +479,30 @@ input[type=range] { width: 100%; accent-color: var(--act); min-height: 32px; }
 .ph-status { margin-top: var(--sp-3); padding: var(--sp-3); border-radius: var(--radius-sm); background: var(--good-soft); color: var(--good-ink); font-size: var(--fs-sm); }
 #ph-zip:disabled { opacity: .5; cursor: not-allowed; }
 @media (max-width: 960px) { .ph-layout { grid-template-columns: minmax(0, 1fr); } .ph-side { position: static; } }
+
+/* ---------- Studio : contour libre, coins, poteaux ---------- */
+.struct { fill: url(#hatch); stroke: var(--ink); stroke-width: .03; }
+.struct--gaine { fill: #fff8f0; stroke-dasharray: .12 .08; }
+.item:has(.struct) { cursor: move; }
+.wall-handles .vtx { cursor: grab; }
+.wall-handles .vtx circle { fill: var(--surface); stroke: var(--act); stroke-width: .06; }
+.wall-handles .vtx:hover circle, .wall-handles .vtx.is-sel circle { fill: var(--act); }
+.wall-handles .vtx-txt { font: 800 .32px var(--font-display); fill: var(--act-ink); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.wall-handles .mid { cursor: copy; opacity: .55; }
+.wall-handles .mid:hover { opacity: 1; }
+.wall-handles .mid circle { fill: var(--surface); stroke: var(--ink-soft); stroke-width: .03; }
+.wall-handles .mid path { stroke: var(--ink); stroke-width: .045; stroke-linecap: round; }
+.door.is-edit { cursor: ew-resize; }
+.door.is-edit:hover line:first-child { stroke: var(--act-soft); }
+.wall-hint { margin: 0; }
+.corners { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 12px; background: var(--surface); }
+.corners summary { cursor: pointer; font-size: var(--fs-sm); font-weight: 600; min-height: 32px; display: flex; align-items: center; gap: 6px; }
+.corners summary span { font-weight: 400; color: var(--ink-soft); font-size: var(--fs-xs); }
+.corner-table { width: 100%; font-size: var(--fs-xs); margin: 6px 0 10px; }
+.corner-table th, .corner-table td { padding: 4px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.corner-table thead th { background: none; padding-top: 0; }
+.corner-table tbody th { font-family: var(--font-display); color: var(--act-ink); }
+.corner-table tr.is-sel { background: var(--act-soft); }
+.corner-table input { width: 64px; min-height: 34px; padding: 4px 6px; border: 1.5px solid var(--field); border-radius: 8px; font: 600 var(--fs-xs) var(--font); background: var(--surface); color: var(--ink); }
+.corner-table td.num { white-space: nowrap; color: var(--ink-soft); }
+.corner-table button { width: 30px; height: 30px; border: 0; border-radius: 50%; background: var(--sable-2); color: var(--ink); cursor: pointer; }

@@ -1,6 +1,7 @@
 /* MAGMART — Studio 2D : esquisse d'implantation d'un magasin.
    Toutes les coordonnées sont en mètres. Origine en haut à gauche du local ;
-   x vers la droite (largeur), y vers la façade (profondeur). L'entrée est sur la façade (y = D).
+   x vers la droite (largeur), y vers la façade (profondeur).
+   Le contour du local est un polygone libre (S.poly) ; l'entrée est posée sur l'un de ses murs (S.door).
    Dépend de main.js (Projet, waLink). */
 
 (() => {
@@ -26,7 +27,11 @@
     web:      { label: "Poste de préparation des commandes web", short: "Web", w: 2.0, d: 0.8, h: 0.9, color: "#0f766e", cat: "service" },
     chambre:  { label: "Chambre froide", short: "Ch. froide", w: 3.0, d: 2.5, h: 2.4, color: "#52525b", cat: "reserve" },
     rack:     { label: "Rack de réserve", short: "Rack", w: 2.7, d: 1.0, h: 2.5, color: "#a8a29e", cat: "reserve" },
+    // Structure du local : du sol au plafond, jamais comptée comme mobilier
+    poteau:   { label: "Poteau de structure", short: "Poteau", w: 0.4, d: 0.4, get h() { return S?.H || 3.5; }, color: "#57534e", cat: "structure" },
+    gaine:    { label: "Gaine ou trémie", short: "Gaine", w: 0.6, d: 0.6, get h() { return S?.H || 3.5; }, color: "#78716c", cat: "structure" },
   };
+  const isStruct = (it) => CATALOG[it.type]?.cat === "structure";
   const ZONES = {
     vente:       { label: "Surface de vente", color: "#15803d", sales: 1 },
     fl:          { label: "Fruits & légumes", color: "#4d7c0f", sales: 1 },
@@ -77,6 +82,7 @@
 
   /* ---------------- État ---------------- */
   const r1 = (v) => Math.round(v * 10) / 10;
+  const r2 = (v) => Math.round(v * 100) / 100;
   const snap = (v) => Math.round(v / SNAP) * SNAP;
   const uid = () => Math.random().toString(36).slice(2, 9);
   const num = (v) => new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1, minimumFractionDigits: 1 }).format(v);
@@ -86,31 +92,118 @@
     const W = Math.max(6, Math.round(Math.sqrt(surf * 1.3) * 2) / 2);
     const D = Math.max(5, Math.round((surf / W) * 2) / 2);
     return { shape: "rect", W, D, H: 3.5, nW: Math.round(W / 3), nD: Math.round(D / 3), doorX: r1(W / 2 - 1), doorW: 2,
+             poly: [[0, 0], [W, 0], [W, D], [0, D]], door: { e: 2, t: r1(W / 2 - 1), w: 2 },
              zones: [], items: [], cut: { dir: "A", pos: 0.55 } };
   }
   let S;
   try { S = JSON.parse(localStorage.getItem(STORE)) || defaultState(); } catch { S = defaultState(); }
 
-  let selected = null;     // { kind: "item" | "zone", id }
+  let selected = null;     // { kind: "item" | "zone", id } ou { kind: "vtx", i } pour un coin du local
+  let activeTab = "local"; // les poignées des murs s'affichent dans l'onglet Local
   let zoneTool = null;     // type de zone en cours de dessin
   const history = [];
   const pushHistory = () => { history.push(JSON.stringify(S)); if (history.length > 60) history.shift(); };
   const save = () => { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch { /* navigation privée */ } };
 
-  /* ---------------- Géométrie ---------------- */
-  const notch = () => (S.shape === "L" ? { x: S.W - S.nW, y: 0, w: S.nW, h: S.nD } : null);
-  const area = () => S.W * S.D - (S.shape === "L" ? S.nW * S.nD : 0);
+  /* ---------------- Géométrie : contour libre, entrée sur un mur ---------------- */
+  const LETTER = (i) => String.fromCharCode(65 + (i % 26)) + (i >= 26 ? Math.floor(i / 26) : "");
+  const presetPoly = () => {
+    const { W, D } = S;
+    return S.shape === "L" ? [[0, 0], [W - S.nW, 0], [W - S.nW, S.nD], [W, S.nD], [W, D], [0, D]] : [[0, 0], [W, 0], [W, D], [0, D]];
+  };
+  const outline = () => S.poly;
+  const notch = () => null;   // ancien retrait du local en L : le contour libre le remplace
+  const polyArea = (P) => Math.abs(P.reduce((a, [x, y], i) => { const [x2, y2] = P[(i + 1) % P.length]; return a + x * y2 - x2 * y; }, 0)) / 2;
+  const area = () => polyArea(S.poly);
+  // Surface d'une zone rectangulaire à l'intérieur des murs (échantillonnage tous les 10 cm)
+  function zoneArea(z) {
+    if (insideLocal(z)) return z.w * z.h;
+    let n = 0; const st = 0.1;
+    for (let x = z.x + st / 2; x < z.x + z.w; x += st) for (let y = z.y + st / 2; y < z.y + z.h; y += st) if (pointIn(x, y)) n++;
+    return n * st * st;
+  }
+  function pointIn(x, y, P = S.poly) {
+    let c = false;
+    for (let i = 0, j = P.length - 1; i < P.length; j = i++) {
+      const [xi, yi] = P[i], [xj, yj] = P[j];
+      if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) c = !c;
+    }
+    return c;
+  }
+  // Murs : extrémités, longueur, direction u et normale n tournée vers l'intérieur du local
+  function edges() {
+    return S.poly.map((a, i) => {
+      const b = S.poly[(i + 1) % S.poly.length], dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy) || 1e-9;
+      const u = [dx / len, dy / len], m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+      let n = [-u[1], u[0]];
+      if (!pointIn(m[0] + n[0] * 0.02, m[1] + n[1] * 0.02)) n = [-n[0], -n[1]];
+      return { i, a, b, len, u, n, m };
+    });
+  }
+  const crossP = (p, q, r) => (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]);
+  const segCross = (p1, p2, q1, q2) => {
+    const d1 = crossP(q1, q2, p1), d2 = crossP(q1, q2, p2), d3 = crossP(p1, p2, q1), d4 = crossP(p1, p2, q2);
+    return d1 * d2 < -1e-12 && d3 * d4 < -1e-12;
+  };
   const box = (it) => (it.rot ? { x: it.x, y: it.y, w: it.d, h: it.w } : { x: it.x, y: it.y, w: it.w, h: it.d });
   const hit = (a, b) => a.x < b.x + b.w - 1e-3 && b.x < a.x + a.w - 1e-3 && a.y < b.y + b.h - 1e-3 && b.y < a.y + a.h - 1e-3;
+  // Un rectangle est dans le local si ses coins y sont, qu'aucun coin du local n'y entre et qu'aucun mur ne le traverse
   const insideLocal = (r) => {
-    const n = notch();
-    return r.x >= -1e-3 && r.y >= -1e-3 && r.x + r.w <= S.W + 1e-3 && r.y + r.h <= S.D + 1e-3 && !(n && hit(r, n));
+    const e = 2e-3, q = [[r.x + e, r.y + e], [r.x + r.w - e, r.y + e], [r.x + r.w - e, r.y + r.h - e], [r.x + e, r.y + r.h - e]];
+    if (!q.every(([x, y]) => pointIn(x, y))) return false;
+    if (S.poly.some(([x, y]) => x > r.x + e && x < r.x + r.w - e && y > r.y + e && y < r.y + r.h - e)) return false;
+    return !edges().some((E) => q.some((p, k) => segCross(p, q[(k + 1) % 4], E.a, E.b)));
   };
-  const outline = () => {
-    const { W, D } = S;
-    if (S.shape !== "L") return [[0, 0], [W, 0], [W, D], [0, D]];
-    return [[0, 0], [W - S.nW, 0], [W - S.nW, S.nD], [W, S.nD], [W, D], [0, D]];
-  };
+  // Le contour est recalé pour que son coin haut gauche soit à l'origine ; W et D sont son encombrement
+  function normalize() {
+    const xs = S.poly.map((p) => p[0]), ys = S.poly.map((p) => p[1]);
+    const mx = Math.min(...xs), my = Math.min(...ys);
+    if (Math.abs(mx) > 1e-6 || Math.abs(my) > 1e-6) {
+      S.poly = S.poly.map(([x, y]) => [r2(x - mx), r2(y - my)]);
+      S.items.forEach((it) => { it.x = r2(it.x - mx); it.y = r2(it.y - my); });
+      S.zones.forEach((z) => { z.x = r2(z.x - mx); z.y = r2(z.y - my); });
+    }
+    S.W = r2(Math.max(...S.poly.map((p) => p[0]))); S.D = r2(Math.max(...S.poly.map((p) => p[1])));
+    clampDoor();
+  }
+  function doorGeom() {
+    const E = edges()[S.door.e] || edges()[0];
+    const w = Math.min(S.door.w, E.len), t = Math.min(Math.max(0, S.door.t), Math.max(0, E.len - w));
+    const a = [E.a[0] + E.u[0] * t, E.a[1] + E.u[1] * t], b = [a[0] + E.u[0] * w, a[1] + E.u[1] * w];
+    return { E, a, b, w, t, m: [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], u: E.u, n: E.n };
+  }
+  // Dégagement de 1,5 m devant l'entrée (rectangle englobant)
+  function doorClear(depth = 1.5) {
+    const g = doorGeom(), q = [g.a, g.b, [g.a[0] + g.n[0] * depth, g.a[1] + g.n[1] * depth], [g.b[0] + g.n[0] * depth, g.b[1] + g.n[1] * depth]];
+    const x = Math.min(...q.map((p) => p[0])), y = Math.min(...q.map((p) => p[1]));
+    return { x, y, w: Math.max(...q.map((p) => p[0])) - x, h: Math.max(...q.map((p) => p[1])) - y };
+  }
+  function clampDoor() {
+    const k = S.poly.length;
+    S.door.e = ((Math.round(S.door.e) % k) + k) % k;
+    const E = edges()[S.door.e];
+    S.door.w = r1(Math.min(Math.max(0.8, S.door.w), Math.max(0.8, E.len)));
+    S.door.t = r1(Math.min(Math.max(0, S.door.t), Math.max(0, E.len - S.door.w)));
+    // Valeurs reprises par l'implantation type et le kit CAO : l'entrée projetée sur la largeur
+    const g = doorGeom();
+    S.doorX = r1(Math.min(g.a[0], g.b[0])); S.doorW = r1(Math.max(0.8, Math.abs(g.b[0] - g.a[0])));
+  }
+  // Pose l'entrée sur le mur le plus proche d'un point (déplacement à la souris, ajout ou retrait de coin)
+  function attachDoor(pt) {
+    let best = null;
+    edges().forEach((E) => {
+      const sp = Math.max(0, Math.min(E.len, (pt[0] - E.a[0]) * E.u[0] + (pt[1] - E.a[1]) * E.u[1]));
+      const d = Math.hypot(pt[0] - (E.a[0] + E.u[0] * sp), pt[1] - (E.a[1] + E.u[1] * sp));
+      if (E.len >= 1 && (!best || d < best.d)) best = { d, E, sp };
+    });
+    if (!best) return;
+    S.door.e = best.E.i; S.door.t = best.sp - S.door.w / 2; clampDoor();
+  }
+  function migrate() {
+    if (!Array.isArray(S.poly) || S.poly.length < 3) S.poly = presetPoly();
+    if (!S.door) { S.door = { e: 0, t: 0, w: S.doorW || 2 }; attachDoor([(S.doorX ?? S.W / 2 - 1) + (S.doorW || 2) / 2, S.D]); }
+    normalize();
+  }
   const clampItem = (it) => {
     const b = box(it);
     it.x = Math.min(Math.max(0, it.x), Math.max(0, S.W - b.w));
@@ -128,7 +221,7 @@
         const A = boxes[i], B = boxes[j];
         if (hit(A.b, B.b)) { bad.add(A.it.id); bad.add(B.it.id); issues.push(`${A.c.short} et ${B.c.short} se chevauchent`); continue; }
         // Les allées ne concernent que la surface de vente ; la réserve et le poste web sont séparés par une cloison
-        if (["reserve", "service"].includes(A.c.cat) || ["reserve", "service"].includes(B.c.cat)) continue;
+        if (["reserve", "service", "structure"].includes(A.c.cat) || ["reserve", "service", "structure"].includes(B.c.cat)) continue;
         const ox = Math.min(A.b.x + A.b.w, B.b.x + B.b.w) - Math.max(A.b.x, B.b.x);
         const oy = Math.min(A.b.y + A.b.h, B.b.y + B.b.h) - Math.max(A.b.y, B.b.y);
         const gy = Math.max(B.b.y - (A.b.y + A.b.h), A.b.y - (B.b.y + B.b.h));
@@ -138,7 +231,7 @@
         if (narrow !== null) issues.push(`Allée de ${num(narrow)} m entre ${A.c.short} et ${B.c.short} (min. ${num(AISLE_MIN)} m)`);
       }
     }
-    const door = { x: S.doorX, y: S.D - 1.5, w: S.doorW, h: 1.5 };
+    const door = doorClear();
     if (boxes.some(({ b }) => hit(b, door))) issues.push("L'entrée est encombrée (1,5 m à dégager)");
     if (S.items.length && !S.items.some((it) => it.type === "caisse")) issues.push("Aucune caisse placée");
     return { issues: [...new Set(issues)], bad };
@@ -150,10 +243,11 @@
     const ventes = S.zones.filter((z) => z.type === "vente");
     const within = (a, b) => a.x >= b.x - 1e-3 && a.y >= b.y - 1e-3 && a.x + a.w <= b.x + b.w + 1e-3 && a.y + a.h <= b.y + b.h + 1e-3;
     const zSales = S.zones.filter((z) => ZONES[z.type].sales && (z.type === "vente" || !ventes.some((v) => within(z, v))))
-      .reduce((s, z) => s + z.w * z.h, 0);
+      .reduce((s, z) => s + zoneArea(z), 0);
     let lin = 0, cold = 0, foot = 0, lanes = 0;
     S.items.forEach((it) => {
       const c = CATALOG[it.type];
+      if (c.cat === "structure") return;
       lin += (c.lin || 0) * it.w;
       if (c.cold) cold += it.w;
       foot += it.w * it.d;
@@ -181,40 +275,66 @@
     text(g, tx, ty, label, { class: "dim-txt", transform: vertical ? `rotate(-90 ${tx} ${ty})` : "" });
   }
 
+  // Cote d'un mur, tracée à l'extérieur et parallèle au mur
+  function wallDim(g, E, off = 0.55) {
+    const o = [-E.n[0] * off, -E.n[1] * off];
+    const a = [E.a[0] + o[0], E.a[1] + o[1]], b = [E.b[0] + o[0], E.b[1] + o[1]];
+    el("line", { x1: a[0], y1: a[1], x2: b[0], y2: b[1], class: "dim" }, g);
+    for (const p of [a, b]) el("line", { x1: p[0] + E.n[0] * 0.15, y1: p[1] + E.n[1] * 0.15, x2: p[0] - E.n[0] * 0.15, y2: p[1] - E.n[1] * 0.15, class: "dim" }, g);
+    let ang = (Math.atan2(E.u[1], E.u[0]) * 180) / Math.PI;
+    if (ang > 90) ang -= 180; else if (ang <= -90) ang += 180;
+    const tx = (a[0] + b[0]) / 2 - E.n[0] * 0.18, ty = (a[1] + b[1]) / 2 - E.n[1] * 0.18;
+    text(g, tx, ty, `${num(E.len)} m`, { class: "dim-txt", transform: `rotate(${ang.toFixed(2)} ${tx} ${ty})`, "dominant-baseline": "central" });
+  }
+
   function renderPlan() {
     const { W, D } = S;
     const pad = 1.6;
-    plan.setAttribute("viewBox", `${-pad} ${-pad} ${W + pad * 2} ${D + pad * 2 + 0.6}`);
-    plan.style.aspectRatio = `${W + pad * 2} / ${D + pad * 2 + 0.6}`;
+    const xs = S.poly.map((p) => p[0]), ys = S.poly.map((p) => p[1]);
+    const bx = Math.min(0, ...xs), by = Math.min(0, ...ys), bw = Math.max(W, ...xs) - bx, bh = Math.max(D, ...ys) - by;
+    plan.setAttribute("viewBox", `${bx - pad} ${by - pad} ${bw + pad * 2} ${bh + pad * 2 + 0.6}`);
+    plan.style.aspectRatio = `${bw + pad * 2} / ${bh + pad * 2 + 0.6}`;
     plan.innerHTML = "";
     const defs = el("defs", {}, plan);
+    const hatch = el("pattern", { id: "hatch", width: 0.12, height: 0.12, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" }, defs);
+    el("rect", { width: 0.12, height: 0.12, fill: "#57534e" }, hatch);
+    el("line", { x1: 0, y1: 0, x2: 0, y2: 0.12, stroke: "#d6d3d1", "stroke-width": 0.04 }, hatch);
     const pat = el("pattern", { id: "grid", width: 1, height: 1, patternUnits: "userSpaceOnUse" }, defs);
     el("path", { d: "M1 0H0V1", fill: "none", stroke: "#dfe7e1", "stroke-width": 0.02 }, pat);
     el("path", { d: "M.5 0V1M0 .5H1", fill: "none", stroke: "#eef2ef", "stroke-width": 0.012 }, pat);
 
     const pts = outline().map((p) => p.join(",")).join(" ");
+    const clip = el("clipPath", { id: "local-clip" }, defs);
+    el("polygon", { points: pts }, clip);
     el("polygon", { points: pts, fill: "#ffffff" }, plan);
     el("polygon", { points: pts, fill: "url(#grid)" }, plan);
 
     const { issues, bad } = analyse();
 
     // Zones
-    const gz = el("g", {}, plan);
+    const gz = el("g", { "clip-path": "url(#local-clip)" }, plan);
     S.zones.forEach((z) => {
       const Z = ZONES[z.type];
       const g = el("g", { "data-kind": "zone", "data-id": z.id, class: "zone" + (selected?.id === z.id ? " is-sel" : "") }, gz);
       el("rect", { x: z.x, y: z.y, width: z.w, height: z.h, fill: Z.color, "fill-opacity": 0.12, stroke: Z.color, "stroke-width": 0.05, "stroke-dasharray": "0.25 0.15" }, g);
       text(g, z.x + 0.15, z.y + 0.42, Z.label, { class: "zone-txt", fill: Z.color });
-      text(g, z.x + 0.15, z.y + 0.78, `${num(z.w * z.h)} m²`, { class: "zone-sub", fill: Z.color });
+      text(g, z.x + 0.15, z.y + 0.78, `${num(zoneArea(z))} m²`, { class: "zone-sub", fill: Z.color });
     });
 
     // Murs
-    el("polygon", { points: pts, fill: "none", stroke: "#1f2a37", "stroke-width": 0.22, "stroke-linejoin": "miter" }, plan);
-    // Entrée
-    el("rect", { x: S.doorX, y: D - 0.2, width: S.doorW, height: 0.4, fill: "#ffffff" }, plan);
-    el("path", { d: `M${S.doorX} ${D} a${S.doorW / 2} ${S.doorW / 2} 0 0 1 ${S.doorW / 2} ${-S.doorW / 2}`, fill: "none", stroke: "#9ca3af", "stroke-width": 0.03 }, plan);
-    el("path", { d: `M${S.doorX + S.doorW} ${D} a${S.doorW / 2} ${S.doorW / 2} 0 0 0 ${-S.doorW / 2} ${-S.doorW / 2}`, fill: "none", stroke: "#9ca3af", "stroke-width": 0.03 }, plan);
-    text(plan, S.doorX + S.doorW / 2, D + 0.75, "▲ ENTRÉE", { class: "door-txt" });
+    el("polygon", { points: pts, fill: "none", stroke: "#24130e", "stroke-width": 0.22, "stroke-linejoin": "miter" }, plan);
+    // Entrée : ouverture dans le mur, deux vantaux ouvrant vers l'intérieur ; elle se déplace à la souris
+    const dg = doorGeom(), hw = dg.w / 2;
+    const gd0 = el("g", { class: "door" + (activeTab === "local" ? " is-edit" : ""), "data-door": "1" }, plan);
+    el("line", { x1: dg.a[0], y1: dg.a[1], x2: dg.b[0], y2: dg.b[1], stroke: "#fff8f0", "stroke-width": 0.32 }, gd0);
+    const sweep = (p, q) => (crossP([0, 0], p, q) > 0 ? 1 : 0);
+    for (const [o, dir] of [[dg.a, dg.u], [dg.b, [-dg.u[0], -dg.u[1]]]]) {
+      const p1 = [o[0] + dg.n[0] * hw, o[1] + dg.n[1] * hw], p2 = [o[0] + dir[0] * hw, o[1] + dir[1] * hw];
+      el("line", { x1: o[0], y1: o[1], x2: p1[0], y2: p1[1], stroke: "#9ca3af", "stroke-width": 0.03 }, gd0);
+      el("path", { d: `M${p1[0]} ${p1[1]} A${hw} ${hw} 0 0 ${sweep([dg.n[0], dg.n[1]], dir)} ${p2[0]} ${p2[1]}`, fill: "none", stroke: "#9ca3af", "stroke-width": 0.03 }, gd0);
+    }
+    el("rect", { x: Math.min(dg.a[0], dg.b[0]) - 0.25, y: Math.min(dg.a[1], dg.b[1]) - 0.25, width: Math.abs(dg.b[0] - dg.a[0]) + 0.5, height: Math.abs(dg.b[1] - dg.a[1]) + 0.5, fill: "transparent" }, gd0);
+    text(plan, dg.m[0] - dg.n[0] * 1.15, dg.m[1] - dg.n[1] * 1.15, "ENTRÉE", { class: "door-txt" });
 
     // Mobilier
     const gi = el("g", {}, plan);
@@ -223,6 +343,11 @@
       const b = box(it);
       const g = el("g", { "data-kind": "item", "data-id": it.id, class: "item" + (selected?.id === it.id ? " is-sel" : "") + (bad.has(it.id) ? " is-bad" : "") }, gi);
       el("title", {}, g).textContent = `${c.label} — ${num(it.w)} × ${num(it.d)} m, h ${num(c.h)} m`;
+      if (c.cat === "structure") {
+        if (it.round) el("ellipse", { cx: b.x + b.w / 2, cy: b.y + b.h / 2, rx: b.w / 2, ry: b.h / 2, class: "struct" }, g);
+        else el("rect", { x: b.x, y: b.y, width: b.w, height: b.h, class: "struct" + (it.type === "gaine" ? " struct--gaine" : "") }, g);
+        return;
+      }
       el("rect", { x: b.x, y: b.y, width: b.w, height: b.h, rx: 0.06, fill: c.color, "fill-opacity": 0.88, stroke: "#ffffff", "stroke-width": 0.04 }, g);
       if (c.lin === 2) { // séparation des deux faces d'une gondole
         const mid = it.rot ? { x1: b.x + b.w / 2, y1: b.y + 0.1, x2: b.x + b.w / 2, y2: b.y + b.h - 0.1 } : { x1: b.x + 0.1, y1: b.y + b.h / 2, x2: b.x + b.w - 0.1, y2: b.y + b.h / 2 };
@@ -249,18 +374,34 @@
       text(gc, x, -1.05, "B", { class: "cut-txt" }); text(gc, x, D + 1.35, "B", { class: "cut-txt" });
     }
 
-    // Cotes
+    // Cotes : la longueur de chaque mur
     const gd = el("g", {}, plan);
-    if (S.shape === "L") {
-      dimLine(gd, 0, -0.75, W - S.nW, -0.75, `${num(W - S.nW)} m`);
-      dimLine(gd, W + 0.75, S.nD, W + 0.75, D, `${num(D - S.nD)} m`, true);
-      dimLine(gd, W - S.nW, S.nD - 0.5, W, S.nD - 0.5, `${num(S.nW)} m`);
+    const E_ = edges();
+    E_.forEach((E) => wallDim(gd, E));
+
+    // Poignées : coins à déplacer, « + » au milieu des murs pour ajouter un coin
+    if (activeTab === "local") {
+      const gh = el("g", { class: "wall-handles" }, plan);
+      E_.forEach((E) => {
+        if (E.len < 0.8) return;
+        const g = el("g", { class: "mid", "data-mid": E.i }, gh);
+        el("title", {}, g).textContent = `Ajouter un coin sur le mur ${LETTER(E.i)}-${LETTER((E.i + 1) % E_.length)}`;
+        el("circle", { cx: E.m[0], cy: E.m[1], r: 0.2 }, g);
+        el("path", { d: `M${E.m[0] - 0.1} ${E.m[1]}h0.2M${E.m[0]} ${E.m[1] - 0.1}v0.2` }, g);
+      });
+      S.poly.forEach(([x, y], i) => {
+        const prev = E_[(i - 1 + E_.length) % E_.length], next = E_[i];
+        let bx_ = prev.n[0] + next.n[0], by_ = prev.n[1] + next.n[1];
+        const l = Math.hypot(bx_, by_) || 1; bx_ /= l; by_ /= l;
+        const g = el("g", { class: "vtx" + (selected?.kind === "vtx" && selected.i === i ? " is-sel" : ""), "data-vtx": i }, gh);
+        el("title", {}, g).textContent = `Coin ${LETTER(i)} : ${num(x)} ; ${num(y)} m — glisser pour déplacer`;
+        el("circle", { cx: x, cy: y, r: 0.24 }, g);
+        text(gh, x - bx_ * 0.62, y - by_ * 0.62, LETTER(i), { class: "vtx-txt" });
+      });
     }
-    dimLine(gd, 0, S.shape === "L" ? -1.25 : -0.75, W, S.shape === "L" ? -1.25 : -0.75, `${num(W)} m`);
-    dimLine(gd, -0.75, 0, -0.75, D, `${num(D)} m`, true);
 
     // Local vide : on indique quoi faire
-    if (!S.items.length && !S.zones.length) text(plan, W / 2, D / 2, "Onglet Local : « Générer une implantation type »", { class: "plan-empty" });
+    if (!S.items.some((it) => !isStruct(it)) && !S.zones.length) text(plan, W / 2, D / 2, "Dessinez le local, puis « Générer une implantation type »", { class: "plan-empty" });
 
     // Dessin de zone en cours
     if (drag?.kind === "draw") {
@@ -370,18 +511,22 @@
     coupe.style.aspectRatio = `${L + 2.8} / ${H + 1.7}`;
     coupe.style.minWidth = `${Math.round((L + 2.8) * 58)}px`; // échelle lisible : la coupe défile horizontalement si besoin
     coupe.innerHTML = "";
-    const n = notch();
-    // Limites du local sur l'axe de coupe
-    let start = 0, end = L;
-    if (n) {
-      if (A && pos < S.nD) end = S.W - S.nW;
-      if (!A && pos > S.W - S.nW) start = S.nD;
-    }
+    // Limites du local sur l'axe de coupe : premier et dernier mur traversés
+    const hits = [];
+    edges().forEach((E) => {
+      const [p, q] = A ? [E.a[1], E.b[1]] : [E.a[0], E.b[0]];
+      if ((p - pos) * (q - pos) > 0 || p === q) return;
+      const k = (pos - p) / (q - p);
+      hits.push(A ? E.a[0] + (E.b[0] - E.a[0]) * k : E.a[1] + (E.b[1] - E.a[1]) * k);
+    });
+    let start = hits.length ? Math.min(...hits) : 0, end = hits.length ? Math.max(...hits) : L;
+    const dgc = doorGeom();
+    const facadeEnd = !A && Math.abs(dgc.u[1]) < 0.2 && Math.abs(end - Math.max(dgc.a[1], dgc.b[1])) < 0.3;
     el("rect", { x: start, y: -H, width: end - start, height: H, fill: "#f4f9f4" }, coupe);
     el("line", { x1: start - 0.25, y1: 0, x2: end + 0.25, y2: 0, stroke: "#1f2a37", "stroke-width": 0.08 }, coupe);
     el("line", { x1: start, y1: -H, x2: end, y2: -H, stroke: "#9ca3af", "stroke-width": 0.03, "stroke-dasharray": "0.2 0.12" }, coupe);
     el("rect", { x: start - 0.22, y: -H - 0.1, width: 0.22, height: H + 0.1, fill: "#1f2a37" }, coupe);
-    if (!(!A && end === S.D)) el("rect", { x: end, y: -H - 0.1, width: 0.22, height: H + 0.1, fill: "#1f2a37" }, coupe);
+    if (!facadeEnd) el("rect", { x: end, y: -H - 0.1, width: 0.22, height: H + 0.1, fill: "#1f2a37" }, coupe);
     else { // façade : vitrine et porte
       el("rect", { x: end, y: -H - 0.1, width: 0.22, height: 0.9, fill: "#1f2a37" }, coupe);
       el("rect", { x: end + 0.05, y: -H + 0.8, width: 0.12, height: H - 0.8, fill: "#bfdbfe" }, coupe);
@@ -451,13 +596,34 @@
       : `<li class="ok">${S.items.length ? "Aucune alerte : circulation et dégagements corrects." : "Ajoutez du mobilier ou générez une implantation type."}</li>`;
 
     // Liste des zones
-    $("zone-list").innerHTML = S.zones.map((z) => `<li><span style="background:${ZONES[z.type].color}"></span>${ZONES[z.type].label} · ${num(z.w * z.h)} m²<button type="button" data-del-zone="${z.id}" aria-label="Supprimer la zone">×</button></li>`).join("") || "<li class='empty'>Aucune zone dessinée.</li>";
+    $("zone-list").innerHTML = S.zones.map((z) => `<li><span style="background:${ZONES[z.type].color}"></span>${ZONES[z.type].label} · ${num(zoneArea(z))} m²<button type="button" data-del-zone="${z.id}" aria-label="Supprimer la zone">×</button></li>`).join("") || "<li class='empty'>Aucune zone dessinée.</li>";
+
+    // Coins et murs, cote par cote
+    const E_ = edges();
+    $("corner-count").textContent = `· ${S.poly.length} coins, ${num(area())} m²`;
+    const focused = document.activeElement?.dataset?.cx !== undefined || document.activeElement?.dataset?.cy !== undefined;
+    if (!focused) {
+      $("corner-rows").innerHTML = S.poly.map(([x, y], i) => `<tr${selected?.kind === "vtx" && selected.i === i ? ' class="is-sel"' : ""}>
+        <th scope="row">${LETTER(i)}</th>
+        <td><input type="number" step="0.05" inputmode="decimal" data-cx="${i}" value="${x}" aria-label="Coin ${LETTER(i)}, x en mètres"></td>
+        <td><input type="number" step="0.05" inputmode="decimal" data-cy="${i}" value="${y}" aria-label="Coin ${LETTER(i)}, y en mètres"></td>
+        <td class="num">${LETTER(i)}→${LETTER((i + 1) % S.poly.length)} : ${num(E_[i].len)} m</td>
+        <td>${S.poly.length > 3 ? `<button type="button" data-cdel="${i}" aria-label="Supprimer le coin ${LETTER(i)}">×</button>` : ""}</td></tr>`).join("");
+    }
 
     // Propriétés de la sélection
     const box_ = $("sel-props");
     const it = selected?.kind === "item" ? S.items.find((i) => i.id === selected.id) : null;
     const z = selected?.kind === "zone" ? S.zones.find((i) => i.id === selected.id) : null;
-    box_.hidden = !it && !z;
+    const vx = selected?.kind === "vtx" ? S.poly[selected.i] : null;
+    box_.hidden = !it && !z && !vx;
+    $("vtx-del").hidden = !vx || S.poly.length <= 3;
+    $("sel-round-wrap").hidden = !(it && it.type === "poteau");
+    if (it && it.type === "poteau") $("sel-round").checked = !!it.round;
+    if (vx) {
+      $("sel-name").textContent = `Coin ${LETTER(selected.i)} · ${num(vx[0])} ; ${num(vx[1])} m`;
+      $("sel-item-fields").hidden = true; $("sel-h").textContent = "glissez-le sur le plan ou saisissez ses cotes";
+    }
     if (it) {
       const c = CATALOG[it.type];
       $("sel-name").textContent = c.label;
@@ -465,18 +631,22 @@
       $("sel-item-fields").hidden = false;
     } else if (z) {
       $("sel-name").textContent = ZONES[z.type].label;
-      $("sel-w").value = r1(z.w); $("sel-d").value = r1(z.h); $("sel-h").textContent = `${num(z.w * z.h)} m²`;
+      $("sel-w").value = r1(z.w); $("sel-d").value = r1(z.h); $("sel-h").textContent = `${num(zoneArea(z))} m²`;
       $("sel-item-fields").hidden = false;
     }
-    $("sel-rotate").hidden = !it;
+    $("sel-rotate").hidden = !it || isStruct(it);
     $("sel-dup").hidden = !it;
+    $("sel-del").hidden = !!vx;
   }
 
   function syncInputs() {
     document.querySelectorAll("[name=shape]").forEach((r) => (r.checked = r.value === S.shape));
     $("in-W").value = S.W; $("in-D").value = S.D; $("in-H").value = S.H;
     $("in-nW").value = S.nW; $("in-nD").value = S.nD;
-    $("in-doorX").value = S.doorX; $("in-doorW").value = S.doorW;
+    const E_ = edges();
+    $("in-doorE").innerHTML = E_.map((E) => `<option value="${E.i}"${E.len < 1 ? " disabled" : ""}>${LETTER(E.i)}→${LETTER((E.i + 1) % E_.length)} · ${num(E.len)} m</option>`).join("");
+    $("in-doorE").value = S.door.e;
+    $("in-doorX").value = S.door.t; $("in-doorW").value = S.door.w;
     $("l-fields").hidden = S.shape !== "L";
     document.querySelectorAll("[name=cutdir]").forEach((r) => (r.checked = r.value === S.cut.dir));
     $("cut-pos").value = S.cut.pos;
@@ -607,10 +777,10 @@
     img.src = src;
   }
 
-  function render() { renderPlan(); renderCoupe(); renderPg(); save(); window.dispatchEvent(new Event("magmart:plan")); }
+  function render() { renderPlan(); renderCoupe(); renderPg(); if (!document.activeElement?.closest?.("#panel-local")) syncInputs(); save(); window.dispatchEvent(new Event("magmart:plan")); }
 
   // Données et fonctions partagées avec la vue 3D (studio3d.js, chargé à la demande)
-  window.MagmartStudio = { get state() { return S; }, CATALOG, ZONES, FAMILLES, PG, box, outline, notch, faceDir, facesOf, nMods, levelBounds, ensurePg };
+  window.MagmartStudio = { get state() { return S; }, CATALOG, ZONES, FAMILLES, PG, box, outline, notch, faceDir, facesOf, nMods, levelBounds, ensurePg, edges, doorGeom, pointIn };
 
   /* ---------------- Interaction souris / tactile ---------------- */
   let drag = null;
@@ -623,6 +793,26 @@
 
   plan.addEventListener("pointerdown", (e) => {
     const p = toLocal(e);
+    const v = e.target.closest("[data-vtx], [data-mid], [data-door]");
+    if (v && activeTab === "local") {
+      pushHistory();
+      if (v.dataset.door) drag = { kind: "door", moved: false };
+      else {
+        let i = Number(v.dataset.vtx);
+        if (v.dataset.mid !== undefined) {   // nouveau coin au milieu du mur, aussitôt déplaçable
+          const k = Number(v.dataset.mid), E = edges()[k];
+          S.poly.splice(k + 1, 0, [r2(E.m[0]), r2(E.m[1])]);
+          if (S.door.e > k) S.door.e++;
+          else if (S.door.e === k && S.door.t >= E.len / 2) { S.door.e++; S.door.t -= E.len / 2; }
+          i = k + 1; S.shape = "libre";
+        }
+        selected = { kind: "vtx", i };
+        drag = { kind: "vtx", i, moved: v.dataset.mid !== undefined };
+      }
+      plan.setPointerCapture(e.pointerId);
+      render();
+      return;
+    }
     if (zoneTool) {
       drag = { kind: "draw", x0: snap(p.x), y0: snap(p.y), x1: snap(p.x), y1: snap(p.y) };
       plan.setPointerCapture(e.pointerId);
@@ -643,6 +833,17 @@
     if (!drag) return;
     const p = toLocal(e);
     if (drag.kind === "draw") { drag.x1 = snap(Math.min(Math.max(p.x, 0), S.W)); drag.y1 = snap(Math.min(Math.max(p.y, 0), S.D)); renderPlan(); return; }
+    if (drag.kind === "door") { attachDoor([p.x, p.y]); drag.moved = true; render(); return; }
+    if (drag.kind === "vtx") {
+      // Aimantation : le coin s'aligne sur ses voisins à moins de 25 cm (murs d'équerre), sauf avec Alt
+      const k = S.poly.length, prev = S.poly[(drag.i - 1 + k) % k], next = S.poly[(drag.i + 1) % k];
+      let x = snap(p.x), y = snap(p.y);
+      if (!e.altKey) for (const q of [prev, next]) { if (Math.abs(x - q[0]) < 0.25) x = q[0]; if (Math.abs(y - q[1]) < 0.25) y = q[1]; }
+      S.poly[drag.i] = [r2(x), r2(y)];
+      S.shape = "libre"; drag.moved = true;
+      clampDoor(); render();
+      return;
+    }
     const o = drag.obj;
     o.x = snap(p.x - drag.dx); o.y = snap(p.y - drag.dy);
     if (selected.kind === "item") clampItem(o);
@@ -651,6 +852,11 @@
     render();
   });
   const endDrag = () => {
+    if (drag?.kind === "vtx" || drag?.kind === "door") {
+      if (!drag.moved) history.pop();
+      else if (drag.kind === "vtx") normalize();
+      drag = null; syncInputs(); render(); return;
+    }
     if (drag?.kind === "draw") {
       const r = normRect(drag.x0, drag.y0, drag.x1, drag.y1);
       if (r.w >= 0.5 && r.h >= 0.5) {
@@ -674,8 +880,18 @@
     it.x = snap(x ?? (S.W - b.w) / 2); it.y = snap(y ?? (S.D - b.h) / 2);
     return it;
   }
+  function removeVertex(i) {
+    if (S.poly.length <= 3) return;
+    pushHistory();
+    const g = doorGeom().m;
+    S.poly.splice(i, 1);
+    if (S.door.e >= S.poly.length) S.door.e = 0;
+    S.shape = "libre"; selected = null;
+    attachDoor(g); normalize(); syncInputs(); render();
+  }
   function removeSelected() {
     if (!selected) return;
+    if (selected.kind === "vtx") { removeVertex(selected.i); return; }
     pushHistory();
     if (selected.kind === "item") S.items = S.items.filter((i) => i.id !== selected.id);
     else S.zones = S.zones.filter((z) => z.id !== selected.id);
@@ -683,7 +899,7 @@
   }
   function rotateSelected() {
     const it = selected?.kind === "item" && S.items.find((i) => i.id === selected.id);
-    if (!it) return;
+    if (!it || isStruct(it)) return;
     pushHistory();
     const b = box(it), cx = b.x + b.w / 2, cy = b.y + b.h / 2;
     it.rot = it.rot ? 0 : 1;
@@ -701,12 +917,13 @@
     clampItem(copy);
     S.items.push(copy); selected = { kind: "item", id: copy.id }; render();
   }
-  function undo() { if (!history.length) return; S = JSON.parse(history.pop()); selected = null; syncInputs(); render(); }
+  function undo() { if (!history.length) return; S = JSON.parse(history.pop()); migrate(); selected = null; syncInputs(); render(); }
 
   /* Implantation type générée selon les dimensions du local */
   function generateTemplate() {
     pushHistory();
     const items = [], zones = [];
+    const structure = S.items.filter(isStruct);
     const surf = area();
     const W = S.W, D = S.D;
     let sy0 = 0, res = null;
@@ -801,13 +1018,29 @@
     zones.push({ id: uid(), type: "fl", x: Math.max(0, (left ? flx : flx - 3.3) - 0.3), y: D - 3.8, w: surf >= 160 ? 5.9 : 2.6, h: 2.6 });
 
     // On ne garde que ce qui tient dans le local sans chevauchement
-    const kept = [];
+    const kept = [...structure], clear = doorClear();
+    // Une gondole ou une murale qui bute sur un poteau est coupée de part et d'autre, en modules entiers
+    const pieces = [];
     items.forEach((it) => {
+      const cut = ["gondole", "murale"].includes(it.type) && structure.filter((o) => hit(box(o), box(it)));
+      if (!cut || !cut.length) { pieces.push(it); return; }
+      const b = box(it), long0 = it.rot ? b.y : b.x, long1 = long0 + it.w, step = it.type === "gondole" ? 1.25 : 0.5;
+      const blocks = cut.map((o) => { const ob = box(o); return it.rot ? [ob.y - 0.1, ob.y + ob.h + 0.1] : [ob.x - 0.1, ob.x + ob.w + 0.1]; }).sort((p, q) => p[0] - q[0]);
+      let from = long0;
+      for (const [b0, b1] of [...blocks, [long1, long1]]) {
+        const len = Math.floor((Math.min(b0, long1) - from) / step) * step;
+        if (len >= 1.25) { const c = { ...it, id: uid(), w: len }; if (it.rot) c.y = snap(from); else c.x = snap(from); pieces.push(c); }
+        from = Math.max(from, b1);
+      }
+    });
+    pieces.forEach((it) => {
       clampItem(it);
       const b = box(it);
-      if (insideLocal(b) && !kept.some((k) => hit(box(k), b))) kept.push(it);
+      if (insideLocal(b) && !hit(b, clear) && !kept.some((k) => hit(box(k), b))) kept.push(it);
     });
-    S.items = kept;
+    // Une tête de gondole ne reste que si elle est accolée à une gondole conservée
+    const gk = kept.filter((k) => k.type === "gondole").map((k) => { const b = box(k); return { x: b.x - 0.06, y: b.y - 0.06, w: b.w + 0.12, h: b.h + 0.12 }; });
+    S.items = kept.filter((k) => k.type !== "tete" || gk.some((g) => hit(g, box(k))));
     S.zones = zones.filter((z) => z.w > 0.5 && z.h > 0.5).map((z) => ({ ...z, x: r1(z.x), y: r1(z.y), w: r1(Math.min(z.w, W - z.x)), h: r1(Math.min(z.h, D - z.y)) }));
     autoPlanogram();  // la coupe montre aussitôt le planogramme projeté
     selected = null; zoneTool = null; pgSel = null; updateZoneButtons();
@@ -827,18 +1060,19 @@
     clone.insertBefore(style, clone.firstChild);
     return new XMLSerializer().serializeToString(clone);
   }
-  const STUDIO_SVG_CSS = `text{font-family:Arial,sans-serif}.dim{stroke:#6b7280;stroke-width:.03}.dim-txt{font-size:.3px;fill:#4b5563;text-anchor:middle}.zone-txt{font-size:.3px;font-weight:700}.zone-sub{font-size:.24px}.item-txt{fill:#fff;font-weight:700;text-anchor:middle;dominant-baseline:central}.door-txt{font-size:.3px;fill:#1f2a37;font-weight:700;text-anchor:middle}.cutline line{stroke:#c93c1a;stroke-width:.05;stroke-dasharray:.3 .15}.cut-txt{font-size:.45px;font-weight:800;fill:#c93c1a;text-anchor:middle}.cut-cap{font-size:.3px;fill:#1f2a37;font-weight:700;text-anchor:middle}.pg-txt{font-weight:700;text-anchor:middle;dominant-baseline:central}.pg-note{font-size:.13px;fill:#4b5563;dominant-baseline:central}`;
+  const STUDIO_SVG_CSS = `text{font-family:Arial,sans-serif}.dim{stroke:#6b7280;stroke-width:.03}.dim-txt{font-size:.3px;fill:#4b5563;text-anchor:middle}.zone-txt{font-size:.3px;font-weight:700}.zone-sub{font-size:.24px}.item-txt{fill:#fff;font-weight:700;text-anchor:middle;dominant-baseline:central}.door-txt{font-size:.3px;fill:#1f2a37;font-weight:700;text-anchor:middle}.cutline line{stroke:#c93c1a;stroke-width:.05;stroke-dasharray:.3 .15}.cut-txt{font-size:.45px;font-weight:800;fill:#c93c1a;text-anchor:middle}.cut-cap{font-size:.3px;fill:#1f2a37;font-weight:700;text-anchor:middle}.pg-txt{font-weight:700;text-anchor:middle;dominant-baseline:central}.pg-note{font-size:.13px;fill:#4b5563;dominant-baseline:central}.struct{fill:url(#hatch);stroke:#24130e;stroke-width:.03}.struct--gaine{fill:#fff8f0;stroke-dasharray:.12 .08}.wall-handles{display:none}.vtx-txt{display:none}`;
   const download = (blob, name) => { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); };
   function summary() {
     const pgRows = pgStats();
     const pgTotal = pgRows.reduce((s, [, v]) => s + v, 0);
     const m = metrics();
     const count = {};
-    S.items.forEach((it) => { const l = CATALOG[it.type].label; count[l] = (count[l] || 0) + 1; });
-    const zones = S.zones.map((z) => `${ZONES[z.type].label} ${num(z.w * z.h)} m²`).join(", ");
+    S.items.filter((it) => !isStruct(it)).forEach((it) => { const l = CATALOG[it.type].label; count[l] = (count[l] || 0) + 1; });
+    const zones = S.zones.map((z) => `${ZONES[z.type].label} ${num(zoneArea(z))} m²`).join(", ");
     return [
       "Bonjour Magmart, voici l'esquisse de mon magasin faite avec le Studio 2D :",
-      `• Local ${S.shape === "L" ? "en L" : "rectangulaire"} : ${num(S.W)} × ${num(S.D)} m, ${num(m.surf)} m², hauteur ${num(S.H)} m`,
+      `• Local ${S.shape === "L" ? "en L" : S.shape === "libre" ? `de forme libre (${S.poly.length} murs)` : "rectangulaire"} : ${num(S.W)} × ${num(S.D)} m hors tout, ${num(m.surf)} m², hauteur ${num(S.H)} m`,
+      S.items.some(isStruct) ? `• Structure : ${S.items.filter((i) => i.type === "poteau").length} poteau(x), ${S.items.filter((i) => i.type === "gaine").length} gaine(s) ou trémie(s)` : "",
       zones ? `• Zones : ${zones}` : "",
       `• Linéaire de rayonnage : ${num(m.lin)} m (≈ ${Math.round(m.dev)} m développés) · froid : ${num(m.cold)} m · caisses : ${m.lanes}`,
       Object.keys(count).length ? `• Mobilier : ${Object.entries(count).map(([k, v]) => `${v} × ${k}`).join(", ")}` : "",
@@ -849,18 +1083,53 @@
 
   /* ---------------- Branchements de l'interface ---------------- */
   const onNum = (id, fn) => $(id).addEventListener("change", (e) => { const v = parseFloat(String(e.target.value).replace(",", ".")); if (!isNaN(v)) { pushHistory(); fn(v); syncInputs(); render(); } });
-  document.querySelectorAll("[name=shape]").forEach((r) => r.addEventListener("change", () => { pushHistory(); S.shape = r.value; syncInputs(); render(); }));
-  onNum("in-W", (v) => { S.W = Math.min(80, Math.max(3, v)); S.nW = Math.min(S.nW, S.W - 1); S.doorX = Math.min(S.doorX, S.W - S.doorW); S.items.forEach(clampItem); });
-  onNum("in-D", (v) => { S.D = Math.min(80, Math.max(3, v)); S.nD = Math.min(S.nD, S.D - 1); S.items.forEach(clampItem); });
+  // Formes de départ : rectangle et L redessinent le contour ; « Libre » garde le contour et ouvre la saisie des coins
+  const resetPoly = () => { const g = doorGeom().m; S.poly = presetPoly(); normalize(); attachDoor([Math.min(g[0], S.W), S.D]); S.items.forEach(clampItem); };
+  document.querySelectorAll("[name=shape]").forEach((r) => r.addEventListener("change", () => {
+    pushHistory(); S.shape = r.value;
+    if (r.value === "libre") $("corners").open = true; else resetPoly();
+    selected = null; syncInputs(); render();
+  }));
+  // Largeur et profondeur : un contour libre est étiré proportionnellement
+  const stretch = (k, axis) => { S.poly = S.poly.map((p) => (axis ? [p[0], r2(p[1] * k)] : [r2(p[0] * k), p[1]])); normalize(); };
+  onNum("in-W", (v) => { v = Math.min(80, Math.max(3, v)); if (S.shape === "libre") stretch(v / S.W, 0); else { S.W = v; S.nW = Math.min(S.nW, S.W - 1); resetPoly(); } S.items.forEach(clampItem); });
+  onNum("in-D", (v) => { v = Math.min(80, Math.max(3, v)); if (S.shape === "libre") stretch(v / S.D, 1); else { S.D = v; S.nD = Math.min(S.nD, S.D - 1); resetPoly(); } S.items.forEach(clampItem); });
   onNum("in-H", (v) => { S.H = Math.min(10, Math.max(2.4, v)); });
-  onNum("in-nW", (v) => { S.nW = Math.min(S.W - 1, Math.max(0.5, v)); });
-  onNum("in-nD", (v) => { S.nD = Math.min(S.D - 1, Math.max(0.5, v)); });
-  onNum("in-doorX", (v) => { S.doorX = Math.min(S.W - S.doorW, Math.max(0, v)); });
-  onNum("in-doorW", (v) => { S.doorW = Math.min(S.W, Math.max(0.9, v)); S.doorX = Math.min(S.doorX, S.W - S.doorW); });
+  onNum("in-nW", (v) => { S.nW = Math.min(S.W - 1, Math.max(0.5, v)); resetPoly(); });
+  onNum("in-nD", (v) => { S.nD = Math.min(S.D - 1, Math.max(0.5, v)); resetPoly(); });
+  onNum("in-doorX", (v) => { S.door.t = v; clampDoor(); });
+  onNum("in-doorW", (v) => { S.door.w = v; clampDoor(); });
+  $("in-doorE").addEventListener("change", (e) => { pushHistory(); S.door.e = Number(e.target.value); clampDoor(); syncInputs(); render(); });
+  // Coins saisis au clavier
+  $("corner-rows").addEventListener("change", (e) => {
+    const t = e.target, v = parseFloat(String(t.value).replace(",", "."));
+    if (isNaN(v)) return;
+    const i = Number(t.dataset.cx ?? t.dataset.cy);
+    pushHistory();
+    S.poly[i][t.dataset.cx !== undefined ? 0 : 1] = r2(v);
+    S.shape = "libre";
+    t.blur(); normalize(); syncInputs(); render();
+  });
+  $("corner-rows").addEventListener("click", (e) => { const b = e.target.closest("[data-cdel]"); if (b) removeVertex(Number(b.dataset.cdel)); });
+  $("corner-add").addEventListener("click", () => {   // nouveau coin au milieu du mur le plus long
+    pushHistory();
+    const E = edges().reduce((a, b) => (b.len > a.len ? b : a));
+    const g = doorGeom().m;
+    S.poly.splice(E.i + 1, 0, [r2(E.m[0]), r2(E.m[1])]);
+    S.shape = "libre"; selected = { kind: "vtx", i: E.i + 1 };
+    attachDoor(g); syncInputs(); render();
+  });
+  $("vtx-del").addEventListener("click", () => selected?.kind === "vtx" && removeVertex(selected.i));
+  $("sel-round").addEventListener("change", (e) => {
+    const it = selected?.kind === "item" && S.items.find((i) => i.id === selected.id);
+    if (!it) return;
+    pushHistory(); it.round = e.target.checked; if (it.round) it.d = it.w; render();
+  });
 
   document.querySelectorAll("[data-add]").forEach((b) => b.addEventListener("click", () => {
     pushHistory();
     const it = addItem(b.dataset.add);
+    if (b.dataset.round) it.round = true;
     S.items.push(it); selected = { kind: "item", id: it.id }; zoneTool = null; updateZoneButtons(); render();
   }));
   function updateZoneButtons() {
@@ -877,11 +1146,12 @@
   });
 
   ["sel-w", "sel-d"].forEach((id) => $(id).addEventListener("change", (e) => {
-    const v = parseFloat(String(e.target.value).replace(",", ".")); if (isNaN(v) || v < 0.3) return;
-    pushHistory();
+    const v = parseFloat(String(e.target.value).replace(",", "."));
     const it = selected.kind === "item" ? S.items.find((i) => i.id === selected.id) : null;
+    if (isNaN(v) || v < (it && isStruct(it) ? 0.1 : 0.3)) return;
+    pushHistory();
     const z = selected.kind === "zone" ? S.zones.find((i) => i.id === selected.id) : null;
-    if (it) { it[id === "sel-w" ? "w" : "d"] = r1(v); clampItem(it); }
+    if (it) { it[id === "sel-w" ? "w" : "d"] = isStruct(it) ? r2(v) : r1(v); if (it.round) { it.w = it.d = r2(v); } clampItem(it); }
     if (z) { z[id === "sel-w" ? "w" : "h"] = r1(v); }
     render();
   }));
@@ -893,7 +1163,7 @@
   $("btn-undo").addEventListener("click", undo);
   $("btn-reset").addEventListener("click", () => {
     if (!confirm("Effacer le plan et repartir d'un local vide ?")) return;
-    pushHistory(); const d = defaultState(); S = d; selected = null; syncInputs(); render();
+    pushHistory(); const d = defaultState(); S = d; migrate(); selected = null; syncInputs(); render();
   });
   $("btn-svg").addEventListener("click", () => exportNode(plan, "magmart-implantation"));
   $("btn-png").addEventListener("click", () => exportNode(plan, "magmart-implantation", true));
@@ -980,6 +1250,9 @@
     document.querySelectorAll("[data-tab]").forEach((x) => { x.setAttribute("aria-selected", x === t); x.tabIndex = x === t ? 0 : -1; });
     document.querySelectorAll("[data-panel]").forEach((p) => (p.hidden = p.dataset.panel !== t.dataset.tab));
     if (t.dataset.tab !== "zones") { zoneTool = null; updateZoneButtons(); }
+    activeTab = t.dataset.tab;
+    if (selected?.kind === "vtx" && activeTab !== "local") selected = null;
+    renderPlan();
   }));
 
   document.addEventListener("keydown", (e) => {
@@ -989,9 +1262,15 @@
     if (e.key === "Escape") { selected = null; zoneTool = null; updateZoneButtons(); render(); return; }
     if (!selected) return;
     if (e.key === "Delete" || e.key === "Backspace") { e.preventDefault(); removeSelected(); return; }
-    if (e.key.toLowerCase() === "r") { rotateSelected(); return; }
+    if (e.key.toLowerCase() === "r" && selected.kind === "item") { rotateSelected(); return; }
     const step = e.shiftKey ? 0.5 : 0.1;
     const mv = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+    if (mv && selected.kind === "vtx") {
+      e.preventDefault(); pushHistory();
+      const q = S.poly[selected.i]; S.poly[selected.i] = [r2(q[0] + mv[0]), r2(q[1] + mv[1])];
+      S.shape = "libre"; normalize(); syncInputs(); render();
+      return;
+    }
     if (mv) {
       e.preventDefault();
       const o = (selected.kind === "item" ? S.items : S.zones).find((i) => i.id === selected.id);
@@ -1039,6 +1318,7 @@
     ["pointerup", "pointerleave", "pointercancel"].forEach((ev) => b.addEventListener(ev, () => view3d?.setHold(0)));
   });
 
+  migrate();
   syncInputs();
   updateZoneButtons();
   render();
